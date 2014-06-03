@@ -34,14 +34,22 @@ def parse_manifests(ini_files, options):
 
     return manifests
 
-def summarize_manifests(manifests):
+def summarize_manifests(manifests, verbose=False):
+    print
     print '# {} manifests found.'.format(len(manifests))
     print
 
     for manifest, manifest_data in manifests.iteritems():
-        print '. Manifest "{}": {} total tests. {} active tests.'.format(manifest, manifest_data['total_tests'], manifest_data['active_tests'])
+        total_tests, active_tests = manifest_data['total_tests'], manifest_data['active_tests']
+        if verbose:
+            print '. Manifest "{}": {} total tests. {} active tests.'.format(manifest, total_tests, active_tests)
+            continue
+
+        if total_tests > active_tests:
+            print '. Manifest "{}": {} tests skipped (out of {})'.format(manifest, total_tests - active_tests, total_tests)
     print '-' * 80
-    print '{} ...'.format(json.dumps(manifests, indent=2)[:800])
+    print 'Excerpt from the JSON output:'
+    print '{} ...'.format(json.dumps(manifests, indent=2)[:1500])
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
