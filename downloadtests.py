@@ -37,7 +37,7 @@ def download_zip(url, extraction_path):
     # If the extraction folder already exists, we delete it
     if os.path.isdir(extraction_path):
         shutil.rmtree(extraction_path)
-    
+
     # We create a new folder
     os.mkdir(extraction_path)
 
@@ -67,16 +67,18 @@ def main():
             return
 
     print 'Downloading tests.zip for this configuration: {}'.format(options)
-    
+
     # Getting the tests.zip link from the nightlies page
-    dl_link = tests_link(**options)
+    dl_options = {option: value for option, value in options.iteritems()
+                  if option in {'os', 'bits', 'processor'}}
+    dl_link = tests_link(**dl_options)
     if dl_link is None:
         print "Couldn't find any tests.zip download suitable for your configuration"
         return
 
     print 'Download link is "{}".'.format(dl_link)
     # Downloading and extracting tests.zip to the given path
-    # download_zip(dl_link, extraction_path=path)
+    download_zip(dl_link, extraction_path=path)
 
     # TODO: add the manifests analysis here (for all platforms)
 
