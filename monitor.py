@@ -17,7 +17,7 @@ log.addHandler(handler)
 CONFIG_CHOICES = {'os': ['linux', 'bsd', 'win', 'mac', 'unix'],
                   'bits': ['32', '64'],
                   'processor': ['x86', 'x86_64', 'ppc'],
-                  'toolkit': ['gonk', 'android']}
+                  'toolkit': ['gonk', 'android', 'gtk2']}
 
 def get_ini_files(src_dir_path):
     """Give the list of all the .ini files in a given directory"""
@@ -38,17 +38,23 @@ def manifests_state(manifest_paths, options):
         try:
             test_manifest = TestManifest([manifest_path])
             if test_manifest.tests:
-                active_tests_paths = [t['path'] for t in test_manifest.active_tests(options=options)]
+                active_tests = test_manifest.active_tests(exists=False, **options)
+                active_tests_paths = [t['path'] for t in active_tests]
                 skipped_tests = [t for t in test_manifest.tests if t['path'] not in active_tests_paths]
 
                 total_tests += len(test_manifest.tests)
                 if skipped_tests:
+                    log.info('')
+                    log.info(active_tests_paths)
+                    log.info('')
+                    log.info([t['path'] for t in test_manifest.tests])
+
                     total_skipped += len(skipped_tests)
                     manifests[manifest_path] = dict(total_tests=len(test_manifest.tests),
                                                     skipped_tests=len(skipped_tests),
                                                     skipped_tests_paths=skipped_tests)
         except Exception as e:
-            log.debug('Skipping {}. Exception: {}.'.format(manifest_path, e))
+            log.info('Skipping {}. Exception: {}.'.format(manifest_path, e))
 
     result = dict(options=options, manifests=manifests, total_skipped=total_skipped, total_tests=total_tests)
     return result
@@ -71,11 +77,14 @@ def display_summary(summary, verbose=False):
         if skipped_tests > 0:
             log.info('. Manifest "{}": {}/{} tests skipped'.format(manifest, skipped_tests, total_tests))
 
+MANIFESTS_REL_PATHS = ['reftest/reftest.ini', 'marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini']
+def generate_manifest_paths(src_dir_path):
+    return [os.path.join(src_dir_path, rel_path) for rel_path in MANIFESTS_REL_PATHS]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('src_path', type=str,
-                         help="path to the source directory")
+    parser.add_argument('tests_path', type=str,
+                         help="path to the tests directory")
     parser.add_argument('dest_path', type=str,
                          help="path where the JSON result will be stored")
     for key in CONFIG_CHOICES:
@@ -83,15 +92,15 @@ def main():
                            nargs='?',
                            help="display choices for %s" % key)
     args = parser.parse_args()
-    src_path = args.src_path
+    tests_path = args.tests_path
     dest_path = args.dest_path
     options = {option: value for option, value in args.__dict__.iteritems()
-               if value is not None and not option in {'src_path', 'dest_path'}}
+               if value is not None and not option in {'tests_path', 'dest_path'}}
 
-    log.info("Options = {}".format(options))
+    log.info("Options = {}.".format(options))
 
-    ini_files = get_ini_files(src_path)
-    summary = manifests_state(ini_files, options)
+    manifest_paths = generate_manifest_paths(tests_path)
+    summary = manifests_state(manifest_paths, options)
     display_summary(summary)
     # Saving the result to the output file
     with open(dest_path, 'w+') as output_file:
