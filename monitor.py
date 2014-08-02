@@ -38,7 +38,7 @@ def manifests_state(manifest_paths, options):
         try:
             test_manifest = TestManifest([manifest_path])
             if test_manifest.tests:
-                active_tests = test_manifest.active_tests(exists=False, **options)
+                active_tests = test_manifest.active_tests(exists=False, disabled=False, **options)
                 active_tests_paths = [t['path'] for t in active_tests]
                 skipped_tests = [t for t in test_manifest.tests if t['path'] not in active_tests_paths]
 
