@@ -14,13 +14,10 @@ class CodeRevision(mongoengine.Document):
     processed = mongoengine.BooleanField(default=False)
     total_tests_count = mongoengine.IntField(default=0)
     skipped_tests_count = mongoengine.IntField(default=0)
-    manifest_states = mongoengine.DictField()
+    manifest_states = mongoengine.ListField(default=list)
 
 
     MANIFESTS_REL_PATHS = ['reftest/reftest.ini', 'marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini']
-    @classmethod
-    def manifest_paths(self, tests_path):
-        return [os.path.join(tests_path, rel_path) for rel_path in CodeRevision.MANIFESTS_REL_PATHS]
 
     def download_tests(self):
         """Downloads and unpacks tests.zip to a temporary folder,
@@ -42,12 +39,12 @@ class CodeRevision(mongoengine.Document):
     def parse_manifests(self, tests_path, options=None):
         """Parses a list of given files as manifests, skipping those that are unparsable.
         Outputs a summary that gives information about the tests activated/skipped."""
-        manifest_paths = CodeRevision.manifest_paths(tests_path)
         self.total_tests_count = 0
         self.skipped_tests_count = 0
 
         options = options or dict()
-        for manifest_path in manifest_paths:
+        for rel_path in CodeRevision.MANIFESTS_REL_PATHS:
+            manifest_path = os.path.join(tests_path, rel_path)
             try:
                 test_manifest = TestManifest([manifest_path])
             except Exception:
@@ -61,8 +58,9 @@ class CodeRevision(mongoengine.Document):
 
             self.total_tests_count += len(test_manifest.tests)
             self.skipped_tests_count += len(skipped_tests)
-            test_suite_state = TestSuiteState(revision=self, options=options,
+            test_suite_state = TestSuiteState(revision=self, test_suite=rel_path, options=options,
                                               active_tests=active_tests, skipped_tests=skipped_tests)
+            self.manifest_states.append(test_suite_state)
             test_suite_state.save()
 
         self.processed = True
@@ -70,6 +68,7 @@ class CodeRevision(mongoengine.Document):
 
 class TestSuiteState(mongoengine.Document):
     revision = mongoengine.ReferenceField(CodeRevision, primary_key=True)
+    test_suite = mongoengine.StringField(required=True)
     options = mongoengine.DictField()
     active_tests = mongoengine.ListField(required=True)
     skipped_tests = mongoengine.ListField(required=True)
