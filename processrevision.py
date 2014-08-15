@@ -21,8 +21,6 @@ if __name__ == '__main__':
             log.info("Processing revision: {}".format(rev.id))
             tests_path = rev.download_tests()
             log.info("Downloaded to tests path: {}".format(tests_path))
-
-            rev.processed = True
-            rev.save()
+            rev.parse_manifests(tests_path)
 
         time.sleep(1)
