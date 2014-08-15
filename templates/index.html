@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block javascript %}
+<script src="/static/js/chart.min.js"></script>
+<script src="/static/js/graphing.js"></script>
+{% endblock %}
 
 {% block body %}
 <div class="col-md-8">
@@ -8,6 +12,8 @@
     <p>
         Graphs will be here
     </p>
+
+    <canvas id="tests-chart" width="720" height="400"></canvas>
 
 </div>
 
