@@ -17,7 +17,9 @@ class CodeRevision(mongoengine.Document):
     manifest_states = mongoengine.ListField(default=list)
 
 
-    MANIFESTS_REL_PATHS = ['reftest/reftest.ini', 'marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini']
+    MANIFESTS_REL_PATHS = ['mochitest/tests/mochitest.ini',
+                           'reftest/reftest.ini',
+                           'marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini']
 
     def download_tests(self):
         """Downloads and unpacks tests.zip to a temporary folder,
