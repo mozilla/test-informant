@@ -48,8 +48,6 @@ class CodeRevision(mongoengine.Document):
         for rel_path in CodeRevision.MANIFESTS_REL_PATHS:
             manifest_path = os.path.join(tests_path, rel_path)
             test_manifest = TestManifest([manifest_path])
-            if not test_manifest.tests:
-                continue
 
             active_tests = [t['path'] for t in test_manifest.active_tests(exists=False, disabled=False, **options)]
             skipped_tests = [t['path'] for t in test_manifest.tests if t['path'] not in active_tests]
