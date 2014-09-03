@@ -45,11 +45,7 @@ class CodeRevision(mongoengine.Document):
         options = options or dict()
         for rel_path in CodeRevision.MANIFESTS_REL_PATHS:
             manifest_path = os.path.join(tests_path, rel_path)
-            try:
-                test_manifest = TestManifest([manifest_path])
-            except Exception:
-                continue
-
+            test_manifest = TestManifest([manifest_path])
             if not test_manifest.tests:
                 continue
 
