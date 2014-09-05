@@ -1,4 +1,4 @@
-manifestmonitor
-===============
+Test Informant
+==============
 
-Gives the state of test manifests for a given revision of mozilla-central
+Web service for monitoring and reporting the state of test manifests.
