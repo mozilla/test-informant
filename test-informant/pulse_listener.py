@@ -34,12 +34,12 @@ def process_build_event(data, message):
         return
 
     try:
-        rev = CodeRevision.objects.get(id=revision_id)
-        log.info("Revision {} already exists".format(revision_id))
+        rev = CodeRevision.objects.get(id=revision)
+        log.info("Revision {} already exists".format(revision))
     except mongoengine.DoesNotExist:
-        rev = CodeRevision(id=revision_id, tests_url=tests_url, date=date)
+        rev = CodeRevision(id=revision, tests_url=tests_url, date=date)
         rev.save()
-        log.info("Created a new revision: {}".format(revision_id))
+        log.info("Created a new revision: {}".format(revision))
 
 def main():
     mongoengine.connect(config.db_name)

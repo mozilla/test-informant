@@ -1,11 +1,25 @@
-import os
-import tempfile
-import urllib2
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 from StringIO import StringIO
 from zipfile import ZipFile
+import os
+import shutil
+import tempfile
+import urllib2
 
 import mongoengine
-from manifestparser import TestManifest
+
+from .parsers import IniParser
+
+SUITES = [{ 'name': 'mochitest-plain',
+            'manifests': ['mochitest/tests/mochitest.ini'],
+            'parser': IniParser },
+          { 'name': 'marionette',
+            'manifests': ['marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini'],
+            'parser': IniParser }]
+
 
 class CodeRevision(mongoengine.Document):
     id = mongoengine.StringField(primary_key=True)
@@ -16,9 +30,6 @@ class CodeRevision(mongoengine.Document):
     skipped_tests_count = mongoengine.IntField(default=0)
     manifest_states = mongoengine.ListField(default=list)
 
-
-    MANIFESTS_REL_PATHS = ['mochitest/tests/mochitest.ini',
-                           'marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini']
 
     def download_tests(self):
         """Downloads and unpacks tests.zip to a temporary folder,
@@ -43,18 +54,16 @@ class CodeRevision(mongoengine.Document):
         self.total_tests_count = 0
         self.skipped_tests_count = 0
 
-        options = options or dict()
-        for rel_path in CodeRevision.MANIFESTS_REL_PATHS:
-            manifest_path = os.path.join(tests_path, rel_path)
-            test_manifest = TestManifest([manifest_path])
+        options = options or {}
+        for suite in SUITES:
+            manifests = [os.path.join(tests_path, m) for m in suite['manifests']]
+            parse = suite['parser']()
+            result = parse(manifests, options)
 
-            active_tests = [t['path'] for t in test_manifest.active_tests(exists=False, disabled=False, **options)]
-            skipped_tests = [t['path'] for t in test_manifest.tests if t['path'] not in active_tests]
-
-            self.total_tests_count += len(test_manifest.tests)
-            self.skipped_tests_count += len(skipped_tests)
-            test_suite_state = TestSuiteState(revision=self, test_suite=rel_path, options=options,
-                                              active_tests=active_tests, skipped_tests=skipped_tests)
+            self.total_tests_count += len(result['skipped']) + len(result['active'])
+            self.skipped_tests_count += len(result['skipped'])
+            test_suite_state = TestSuiteState(revision=self, test_suite=suite['name'], options=options,
+                                              active_tests=result['active'], skipped_tests=result['skipped'])
             self.manifest_states.append(test_suite_state)
             test_suite_state.save()
 

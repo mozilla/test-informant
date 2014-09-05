@@ -4,8 +4,8 @@ import json
 from flask import Flask, render_template
 import mongoengine
 
+from ..models import CodeRevision, SUITES
 import config
-from models import CodeRevision
 
 app = Flask(__name__)
 db = mongoengine.connect(config.db_name)
@@ -16,7 +16,7 @@ def index():
 
 @app.route("/api/stats")
 def rev_stats():
-    test_suites = CodeRevision.MANIFESTS_REL_PATHS
+    test_suites = [s['name'] for s in SUITES]
     revs = CodeRevision.objects(processed=True)
     data = dict()
     datasets = {test_suite: dict(label="Testsuite '{}'".format(test_suite),
