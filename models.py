@@ -18,7 +18,6 @@ class CodeRevision(mongoengine.Document):
 
 
     MANIFESTS_REL_PATHS = ['mochitest/tests/mochitest.ini',
-                           'reftest/reftest.ini',
                            'marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini']
 
     def download_tests(self):
@@ -61,6 +60,7 @@ class CodeRevision(mongoengine.Document):
 
         self.processed = True
         self.save()
+        shutil.rmtree(tests_path)
 
 class TestSuiteState(mongoengine.Document):
     revision = mongoengine.ReferenceField(CodeRevision, primary_key=True)

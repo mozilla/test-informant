@@ -1,26 +1,37 @@
 #!/usr/bin/env python
 import datetime
+import json
 import logging
 import sys
+import uuid
 
+from mozillapulse.consumers import NormalizedBuildConsumer
 import mongoengine
-import mozillapulse.consumers
 
 import config
 from models import CodeRevision
 
 # Setting up logging
-log = logging.getLogger('manifestmonitor')
+log = logging.getLogger('test-informant')
 log.setLevel(logging.INFO)
 handler = logging.StreamHandler(sys.stdout)
 log.addHandler(handler)
 
-def message_handler(data, message):
+def process_build_event(data, message):
+    # ack the message to remove it from the queue
+    message.ack()
+
+    print(json.dumps(data, indent=2))
     # Do something with the message data
     payload = data['payload']
-    revision_id = payload['revision']
-    tests_url = payload['testsurl']
     date = datetime.datetime.fromtimestamp(payload['builddate'])
+    revision = payload['revision']
+    tags = payload['tags']
+    tests_url = payload['testsurl']
+
+    # skip l10n builds
+    if 'l10n' in tags or not revision:
+        return
 
     try:
         rev = CodeRevision.objects.get(id=revision_id)
@@ -30,25 +41,18 @@ def message_handler(data, message):
         rev.save()
         log.info("Created a new revision: {}".format(revision_id))
 
-    # Ack the message to tell pulse we processed it
-    message.ack()
-
 def main():
-    import uuid
-    unique_label = 'manifestmonitor-%s' % uuid.uuid4()
     mongoengine.connect(config.db_name)
 
     # Connect to pulse
-    pulse = mozillapulse.consumers.NormalizedBuildConsumer(applabel=unique_label)
+    unique_label = 'manifestmonitor-%s' % uuid.uuid4()
+    pulse = NormalizedBuildConsumer(applabel=unique_label)
 
     # Tell pulse that you want to listen for all messages ('#' is everything)
     # and give a function to call every time there is a message
-    pulse.configure(topic='build.#', callback=message_handler)
+    pulse.configure(topic='build.mozilla-inbound.#', callback=process_build_event)
 
-    # Print a helpful message
     print 'Listening...\n'
-
-    # Block and call the callback function when a message comes in
     pulse.listen()
 
 if __name__ == "__main__":
