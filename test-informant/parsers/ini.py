@@ -24,9 +24,11 @@ class IniParser(AbstractParser):
             manifests = [manifests]
 
         m = TestManifest(manifests)
-
+        
+        manifests = m.manifests(m.tests)
         active = [t['path'] for t in m.active_tests(exists=False, disabled=False, **buildconfig)]
         skipped = [t['path'] for t in m.tests if t['path'] not in active]
 
         return { 'active': active,
-                 'skipped': skipped }
+                 'skipped': skipped,
+                 'manifests': manifests, }
