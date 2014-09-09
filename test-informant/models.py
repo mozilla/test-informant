@@ -18,6 +18,8 @@ class Suite(Document):
 
 class Build(Document):
     buildid = StringField(primary_key=True)
+    buildtype = StringField(required=True)
+    platform = StringField(required=True)
     config = DictField(required=True)
     date = IntField(required=True)
     revision = StringField(required=True)

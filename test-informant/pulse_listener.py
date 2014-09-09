@@ -16,6 +16,7 @@ import uuid
 from mozillapulse.consumers import NormalizedBuildConsumer
 import mongoengine
 
+from .config import platforms
 from .worker import (
     Worker,
     build_queue,
@@ -35,6 +36,10 @@ def on_build_event(data, message):
 
     # skip l10n builds
     if 'l10n' in payload['tags']:
+        return
+
+    # skip builds without any supported suites running against them
+    if (payload['platform'], payload['buildtype']) not in platforms:
         return
 
     try:
@@ -75,6 +80,7 @@ def run():
         except KeyboardInterrupt:
             sys.exit(1)
     finally:
+        print("Threads finished, performing final cleanup...")
         # clean up leftover tests bundles
         for v in tests_cache.values():
             if os.path.isdir(v):
