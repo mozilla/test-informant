@@ -7,8 +7,6 @@ from __future__ import print_function, unicode_literals
 
 from multiprocessing import cpu_count
 from Queue import Full
-from threading import Thread
-import datetime
 import os
 import shutil
 import sys
@@ -18,8 +16,8 @@ import uuid
 from mozillapulse.consumers import NormalizedBuildConsumer
 import mongoengine
 
-from .foundry import (
-    process_builds,
+from .worker import (
+    Worker,
     build_queue,
     tests_cache
 )
@@ -54,14 +52,15 @@ def run():
     mongoengine.connect('test-informant')
 
     # Start worker threads
-    for w in range(num_workers):
-        thread = Thread(target=process_builds)
-        thread.daemon = True
-        thread.start()
+    for _ in range(num_workers):
+        worker = Worker()
+        worker.daemon = True
+        worker.start()
 
     # Connect to pulse
+    label = 'test-informant-{}'.format(uuid.uuid4())
     topic = 'build.mozilla-inbound.#'
-    pulse = NormalizedBuildConsumer(applabel='test-informant-{}'.format(uuid.uuid4()))
+    pulse = NormalizedBuildConsumer(applabel=label)
     pulse.configure(topic=topic, callback=on_build_event)
 
     print("Listening on '{}'...".format(topic))

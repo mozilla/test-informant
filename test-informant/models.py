@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from mongoengine import (
-    DateTimeField,
     DictField,
     Document,
     IntField,
@@ -20,7 +19,7 @@ class Suite(Document):
 class Build(Document):
     buildid = StringField(primary_key=True)
     config = DictField(required=True)
-    date = DateTimeField(required=True)
+    date = IntField(required=True)
     revision = StringField(required=True)
     total_active_tests = IntField(default=0)
     total_skipped_tests = IntField(default=0)
