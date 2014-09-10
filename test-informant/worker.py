@@ -71,21 +71,21 @@ class Worker(threading.Thread):
         for suite in platforms[(data['platform'], data['buildtype'])]:
             manifests = [os.path.join(tests_path, m) for m in suites[suite]['manifests']]
             parse = suites[suite]['parser']()
-            result = parse(manifests, config)
+            active, skipped = parse(manifests, config)
 
             # only store relative paths
-            result['active'] = [os.path.relpath(t, tests_path) for t in result['active']]
-            result['skipped'] = [os.path.relpath(t, tests_path) for t in result['skipped']]
+            active = [os.path.relpath(t, tests_path) for t in active]
+            skipped = [os.path.relpath(t, tests_path) for t in skipped]
 
             # keep track of totals for the entire build across all test suites
-            build.total_active_tests += len(result['active'])
-            build.total_skipped_tests += len(result['skipped'])
+            build.total_active_tests += len(active)
+            build.total_skipped_tests += len(skipped)
 
             # don't store multiple copies of the same result
             s, created = Suite.objects.get_or_create(
                 name=suite,
-                active_tests=result['active'],
-                skipped_tests=result['skipped']
+                active_tests=active,
+                skipped_tests=skipped,
             )
             s.refcount += 1
             s.save()

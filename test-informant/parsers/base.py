@@ -15,5 +15,5 @@ class AbstractParser(object):
 
         :param manifests: Path or list of paths to manifest(s).
         :param buildconfig: Dict used to filter tests in the manifest(s).
-        :returns: Dict of form { 'active': list, 'skipped': list }.
+        :returns: Tuple of form (active <list>, skipped <list>).
         """
