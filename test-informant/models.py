@@ -15,9 +15,10 @@ class Suite(Document):
     name = StringField(required=True)
     active_tests = ListField(required=True)
     skipped_tests = ListField(required=True)
+    refcount = IntField(default=0)
 
 class Build(Document):
-    buildid = StringField(primary_key=True)
+    buildid = StringField(required=True)
     buildtype = StringField(required=True)
     platform = StringField(required=True)
     config = DictField(required=True)

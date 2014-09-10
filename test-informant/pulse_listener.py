@@ -68,9 +68,13 @@ def run():
     pulse = NormalizedBuildConsumer(applabel=label)
     pulse.configure(topic=topic, callback=on_build_event)
 
-    print("Listening on '{}'...".format(topic))
     try:
-        pulse.listen()
+        while True:
+            print("Listening on '{}'...".format(topic))
+            try:
+                pulse.listen()
+            except IOError: # sometimes socket gets closed
+                pass
     except KeyboardInterrupt:
         print("Waiting for threads to finish processing, press Ctrl-C again to exit now...")
         try:
@@ -83,7 +87,7 @@ def run():
         print("Threads finished, performing final cleanup...")
         # clean up leftover tests bundles
         for v in tests_cache.values():
-            if os.path.isdir(v):
+            if v and os.path.isdir(v):
                 shutil.rmtree(v)
 
 

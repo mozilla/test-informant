@@ -87,8 +87,8 @@ class Worker(threading.Thread):
                 active_tests=result['active'],
                 skipped_tests=result['skipped']
             )
-            if created:
-                s.save()
+            s.refcount += 1
+            s.save()
             build.suites.append(s)
         build.save()
         self.log("finished processing build '{}'.".format(data['buildid']))
@@ -104,10 +104,12 @@ class Worker(threading.Thread):
             start = datetime.datetime.now()
             while datetime.datetime.now() - start < datetime.timedelta(seconds=timeout):
                 if tests_cache[revision] != None:
+                    self.log("using pre-downloaded tests bundle for revision '{}'".format(revision))
                     # another thread has already downloaded the bundle for this revision, woohoo!
                     return tests_cache[revision]
                 time.sleep(1)
 
+        self.log("downloading tests bundle for revision '{}'".format(revision))
         # let other threads know we are already downloading this rev
         tests_cache[revision] = None
         if len(tests_cache) >= MAX_TESTS_CACHE_SIZE:
