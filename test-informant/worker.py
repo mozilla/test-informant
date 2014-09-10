@@ -14,15 +14,12 @@ import traceback
 
 import mozfile
 
-from .config import platforms, suites
+from . import config
 from .models import Build, Suite
 
-MAX_BUILD_QUEUE_SIZE = 100
-build_queue = Queue(maxsize=MAX_BUILD_QUEUE_SIZE)
-
 # save tests bundles so we don't have to download a new one for each platform
-MAX_TESTS_CACHE_SIZE = 10
 tests_cache = OrderedDict()
+build_queue = Queue(maxsize=config.MAX_BUILD_QUEUE_SIZE)
 
 
 class Worker(threading.Thread):
@@ -36,6 +33,7 @@ class Worker(threading.Thread):
     """
     def __init__(self):
         threading.Thread.__init__(self, target=self.do_work)
+        self.daemon = True
 
     def do_work(self):
         while True:
@@ -44,34 +42,35 @@ class Worker(threading.Thread):
                 self.process_build(data)
             except:
                 # keep on truckin' on
-                self.log("encountered an exception:\n{}".format(traceback.format_exc()))
+                self.log("encountered an exception:\n{}.".format(traceback.format_exc()))
             build_queue.task_done()
 
     def process_build(self, data):
-        self.log("now processing:\n{}".format(json.dumps(data, indent=2)))
+        build_str = "{}-{}-{}".format(data['buildid'], data['platform'], data['buildtype'])
+        self.log("now processing build '{}'".format(build_str))
 
         tests_path = self._prepare_tests(data['revision'], data['testsurl'])
 
         # compute mozinfo.json url based off the tests.zip url
-        config_url = '{}.mozinfo.json'.format(data['testsurl'][:-len('.tests.zip')])
-        config_path = self._prepare_config(config_url)
-        with open(config_path, 'r') as f:
-            config = json.loads(f.read())
-        mozfile.remove(config_path)
+        mozinfo_url = '{}.mozinfo.json'.format(data['testsurl'][:-len('.tests.zip')])
+        mozinfo_path = self._prepare_mozinfo(mozinfo_url)
+        with open(mozinfo_path, 'r') as f:
+            mozinfo_json = json.loads(f.read())
+        mozfile.remove(mozinfo_path)
 
         build = Build(
             buildid=data['buildid'],
             buildtype=data['buildtype'],
             platform=data['platform'],
-            config=config,
+            config=mozinfo_json,
             date=data['builddate'],
             revision=data['revision'],
         )
 
-        for suite in platforms[(data['platform'], data['buildtype'])]:
-            manifests = [os.path.join(tests_path, m) for m in suites[suite]['manifests']]
-            parse = suites[suite]['parser']()
-            active, skipped = parse(manifests, config)
+        for suite in config.PLATFORMS[(data['platform'], data['buildtype'])]:
+            manifests = [os.path.join(tests_path, m) for m in config.SUITES[suite]['manifests']]
+            parse = config.SUITES[suite]['parser']()
+            active, skipped = parse(manifests, mozinfo_json)
 
             # only store relative paths
             active = [os.path.relpath(t, tests_path) for t in active]
@@ -91,7 +90,7 @@ class Worker(threading.Thread):
             s.save()
             build.suites.append(s)
         build.save()
-        self.log("finished processing build '{}'.".format(data['buildid']))
+        self.log("finished processing build '{}'.".format(build_str))
 
     def log(self, message):
         print("{} - {}".format(self.name, message))
@@ -112,7 +111,7 @@ class Worker(threading.Thread):
         self.log("downloading tests bundle for revision '{}'".format(revision))
         # let other threads know we are already downloading this rev
         tests_cache[revision] = None
-        if len(tests_cache) >= MAX_TESTS_CACHE_SIZE:
+        if len(tests_cache) >= config.MAX_TESTS_CACHE_SIZE:
             # clean up the oldest revision, it most likely isn't needed anymore
             mozfile.remove(tests_cache.popitem(last=False)[1]) # FIFO
 
@@ -126,8 +125,8 @@ class Worker(threading.Thread):
         tests_cache[revision] = tests_path
         return tests_path
 
-    def _prepare_config(self, config_url):
+    def _prepare_mozinfo(self, mozinfo_url):
         tf = tempfile.mkstemp()[1]
         with open(tf, 'wb') as f:
-            f.write(mozfile.load(config_url).read())
+            f.write(mozfile.load(mozinfo_url).read())
         return tf

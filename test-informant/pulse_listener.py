@@ -5,7 +5,6 @@
 
 from __future__ import print_function, unicode_literals
 
-from multiprocessing import cpu_count
 from Queue import Full
 import os
 import shutil
@@ -16,30 +15,24 @@ import uuid
 from mozillapulse.consumers import NormalizedBuildConsumer
 import mongoengine
 
-from .config import platforms
+from . import config
 from .worker import (
     Worker,
     build_queue,
     tests_cache
 )
 
-num_workers = cpu_count()
-
 def on_build_event(data, message):
     # ack the message to remove it from the queue
     message.ack()
     payload = data['payload']
-
-    # only look at nightly builds
-    #if 'nightly' not in payload['tags']:
-    #    return
 
     # skip l10n builds
     if 'l10n' in payload['tags']:
         return
 
     # skip builds without any supported suites running against them
-    if (payload['platform'], payload['buildtype']) not in platforms:
+    if (payload['platform'], payload['buildtype']) not in config.PLATFORMS:
         return
 
     try:
@@ -57,14 +50,13 @@ def run():
     mongoengine.connect('test-informant')
 
     # Start worker threads
-    for _ in range(num_workers):
+    for _ in range(config.NUM_WORKERS):
         worker = Worker()
-        worker.daemon = True
         worker.start()
 
     # Connect to pulse
     label = 'test-informant-{}'.format(uuid.uuid4())
-    topic = 'build.mozilla-inbound.#'
+    topic = 'build.{}.#'.format(config.BRANCH)
     pulse = NormalizedBuildConsumer(applabel=label)
     pulse.configure(topic=topic, callback=on_build_event)
 
@@ -84,7 +76,7 @@ def run():
         except KeyboardInterrupt:
             sys.exit(1)
     finally:
-        print("Threads finished, performing final cleanup...")
+        print("Threads finished, cleaning up tests cache...")
         # clean up leftover tests bundles
         for v in tests_cache.values():
             if v and os.path.isdir(v):
