@@ -22,7 +22,7 @@ class Build(Document):
     buildtype = StringField(required=True)
     platform = StringField(required=True)
     config = DictField(required=True)
-    date = IntField(required=True)
+    timestamp = IntField(required=True)
     revision = StringField(required=True)
     total_active_tests = IntField(default=0)
     total_skipped_tests = IntField(default=0)

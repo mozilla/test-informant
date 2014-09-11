@@ -63,7 +63,7 @@ class Worker(threading.Thread):
             buildtype=data['buildtype'],
             platform=data['platform'],
             config=mozinfo_json,
-            date=data['builddate'],
+            timestamp=data['builddate'],
             revision=data['revision'],
         )
 
