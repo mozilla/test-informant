@@ -9,6 +9,7 @@ PACKAGE_VERSION = '0.1'
 deps = ['flask',
         'manifestparser',
         'mongoengine',
+        'mozfile',
         'mozillapulse']
 
 setup(name='test-informant',
