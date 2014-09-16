@@ -32,7 +32,8 @@ def on_build_event(data, message):
         return
 
     # skip builds without any supported suites running against them
-    if (payload['platform'], payload['buildtype']) not in config.PLATFORMS:
+    platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
+    if platform not in config.PLATFORMS:
         return
 
     try:

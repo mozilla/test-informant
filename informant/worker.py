@@ -47,7 +47,7 @@ class Worker(threading.Thread):
 
     def process_build(self, data):
         platform = '{}-{}'.format(data['platform'], data['buildtype'])
-        build_str = "{}-{}-{}".format(data['buildid'], platform)
+        build_str = "{}-{}".format(data['buildid'], platform)
         self.log("now processing build '{}'".format(build_str))
 
         # some platforms (i.e android, b2g) have a different set of xpcshell manifests
