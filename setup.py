@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 PACKAGE_VERSION = '0.1'
 
 deps = ['flask',
+        'Jinja2',
         'manifestparser',
         'mongoengine',
         'mozfile',

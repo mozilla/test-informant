@@ -9,11 +9,20 @@ import sys
 
 import mongoengine
 
-from informant.config import PLATFORMS, SUITES
+from informant.config import PLATFORMS
 from informant.models import Build
 
+from .formatters import HTMLFormatter
 
-class TestInformantReport(object):
+class Report(object):
+    def __init__(self, f_date, t_date, f_res, t_res):
+        self.from_date = f_date
+        self.from_results = f_res
+        self.to_date = t_date
+        self.to_results = t_res
+
+
+class ReportGenerator(object):
 
     def __init__(self, db_name, db_server):
         host, port = db_server.split(':')
@@ -38,7 +47,7 @@ class TestInformantReport(object):
 
         ts_range = self.get_timestamp_range(date)
         order_by = '+timestamp' if first else '-timestamp'
-            
+
         for platform in PLATFORMS.keys():
             p = platform.split('-')
             query_set = Build.objects(
@@ -57,38 +66,11 @@ class TestInformantReport(object):
                                                    'skipped': suite.skipped_tests, }
         return raw_data
 
-    def generate(self, from_date, to_date):
+    def __call__(self, from_date, to_date):
         print("Comparing tests from {} to {}".format(from_date, to_date))
-        from_data = self.query_date(from_date, first=True)
-        to_data = self.query_date(to_date, first=False)
-        return from_data, to_data
-
-    def _format_by_suite(self, from_data, to_data):
-        output = []
-        for suite, platforms in to_data.iteritems():
-            output.append('* {}'.format(suite))
-
-            for platform, tests in platforms.iteritems():
-                output.append('** {}'.format(platform))
-                output.append('   total tests: {}'.format(len(tests['active']) + len(tests['skipped'])))
-                output.append('   active tests: {}'.format(len(tests['active'])))
-                output.append('   skipped tests: {}'.format(len(tests['skipped'])))
-
-                added = [t for t in tests['active'] if t not in from_data[suite][platform]['active']]
-                skipped = [t for t in tests['skipped'] if t not in from_data[suite][platform]['skipped']]
-                output.append('   {} tests were added:'.format(len(added)))
-                output.extend(['   \t{}'.format(t) for t in added])
-                output.append('   {} tests were skipped:'.format(len(skipped)))
-                output.extend(['   \t{}'.format(t) for t in skipped])
-        return '\n'.join(output)
-
-    def _format_by_platform(self):
-        pass
-
-    def format_data(self, from_data, to_data, order='suite'):
-        if order == 'suite':
-            return self._format_by_suite(from_data, to_data)
-        return self._format_by_platform(from_data, to_data)
+        from_results = self.query_date(from_date, first=True)
+        to_results = self.query_date(to_date, first=False)
+        return Report(from_date, to_date, from_results, to_results)
 
 
 def cli(args=sys.argv[1:]):
@@ -114,24 +96,32 @@ def cli(args=sys.argv[1:]):
                         choices=['platform', 'suite'],
                         default='suite',
                         help='Summarize report by suite or by platform.')
-    args = vars(parser.parse_args(args))
+    parser.add_argument('-o', '--output-file',
+                        dest='output_file',
+                        default=None,
+                        help='Save the report to a file, defaults to stdout')
+    args = parser.parse_args(args)
 
-    if args['to_date'] and not args['from_date']:
+    if args.to_date and not args.from_date:
         parser.error('Must specify --from-date!')
 
-    if args['from_date'] is None:
+    if args.from_date is None:
         yesterday = datetime.date.today() - datetime.timedelta(days=1)
-        args['from_date'] = yesterday.strftime('%Y-%m-%d')
+        args.from_date = yesterday.strftime('%Y-%m-%d')
 
-    if args['to_date'] is None:
+    if args.to_date is None:
         today = datetime.date.today()
-        args['to_date'] = today.strftime('%Y-%m-%d')
+        args.to_date = today.strftime('%Y-%m-%d')
 
-    order = args.pop('order')
-    report = TestInformantReport(args.pop('db_name'), args.pop('db_server'))
-    data = report.generate(**args)
+    generate = ReportGenerator(args.db_name, args.db_server)
+    report = generate(args.from_date, args.to_date)
 
-    print(report.format_data(*data, order=order))
+    html = HTMLFormatter()
+
+    if args.output_file:
+        html.save_report(report, args.output_file, order=args.order)
+    else:
+        html.print_report(report, order=args.order)
 
 
 if __name__ == '__main__':

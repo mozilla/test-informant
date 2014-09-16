@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    <title>{{ to_date }} Test Report</title>
+</head>
+
+<body>
+    Test Report for {{ to_date }}.
+    <ul id='suites'>
+    {% for suite, platforms in suites|dictsort %}
+        <li>{{suite}}
+            <ul>
+            {% for platform, data in platforms|dictsort %}
+                <li>{{ platform }}
+                    <ul>
+                        <li>total tests: {{ data.total }}</li>
+                        <li>active tests: {{ data.active }}</li>
+                        <li>skipped tests: {{ data.skipped }}</li>
+                        <li>{{ data.added|length }} tests have been added since {{ from_date }}:
+                            <ul>
+                            {% for test in data.added %}
+                                <li>{{ test }}</li>
+                            {% endfor %}
+                            </ul>
+                        </li>
+                        <li>{{ data.removed|length }} tests have been removed since {{ from_date }}:
+                            <ul>
+                            {% for test in data.removed %}
+                                <li>{{ test }}</li>
+                            {% endfor %}
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

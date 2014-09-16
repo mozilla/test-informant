@@ -10,7 +10,7 @@ from .parsers import IniParser
 DB_NAME = 'test-informant'
 
 # branch to listen for builds on
-BRANCH = 'mozilla-inbound'
+BRANCH = 'mozilla-central'
 
 # number of threads to spawn
 NUM_WORKERS = cpu_count()
@@ -35,21 +35,25 @@ SUITES = {
         'manifests': ['xpcshell/tests/xpcshell.ini'],
         'parser': IniParser,
     },
+    'xpcshell-android': {
+        'manifests': ['xpcshell/tests/xpcshell_android.ini'],
+        'parser': IniParser,
+    },
 }
 
 # a mapping from plaform type to enabled suites.
 # keys are a tuple of (platform, buildtype)
 PLATFORMS = {
-    'linux-opt':           ['marionette', 'mochitest-plain', 'xpcshell',],
-    'linux-debug':         ['marionette', 'mochitest-plain', 'xpcshell',],
-    'linux64-opt':         ['marionette', 'mochitest-plain', 'xpcshell',],
-    'linux64-debug':       ['marionette', 'mochitest-plain', 'xpcshell',],
-    'macosx64-opt':        ['marionette', 'mochitest-plain', 'xpcshell',],
-    'macosx64-debug':      ['marionette', 'mochitest-plain', 'xpcshell',],
-    'win32-opt':           ['marionette', 'mochitest-plain', 'xpcshell',],
-    'win32-debug':         ['marionette', 'mochitest-plain', 'xpcshell',],
-#    'android-opt':         ['mochitest-plain', 'xpcshell',],
-    'linux32_gecko-opt':   ['mochitest-plain',],
-    'linux64_gecko-debug': ['mochitest-plain',] ,
-    'mulet-opt':           ['mochitest-plain',],
+    ('linux', 'opt'):           ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('linux', 'debug'):         ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('linux64', 'opt'):         ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('linux64', 'debug'):       ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('macosx64', 'opt'):        ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('macosx64', 'debug'):      ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('win32', 'opt'):           ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('win32', 'debug'):         ['marionette', 'mochitest-plain', 'xpcshell',],
+    ('android', 'opt'):         ['mochitest-plain', 'xpcshell-android',],
+    ('linux32_gecko', 'opt'):   ['mochitest-plain',],
+    ('linux64_gecko', 'debug'): ['mochitest-plain',] ,
+    ('mulet', 'opt'):           ['mochitest-plain',],
 }

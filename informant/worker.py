@@ -82,10 +82,6 @@ class Worker(threading.Thread):
                 # perform the actual manifest parsing
                 active, skipped = parse(manifests, mozinfo_json)
 
-                # only store relative paths
-                active = [os.path.relpath(t, tests_path) for t in active]
-                skipped = [os.path.relpath(t, tests_path) for t in skipped]
-
                 # keep track of totals for the entire build across all test suites
                 build.total_active_tests += len(active)
                 build.total_skipped_tests += len(skipped)
