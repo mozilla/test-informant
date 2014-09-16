@@ -1,3 +1,6 @@
+# User defined
+*.swp
+
 # Ignore config file
 config.py
 
@@ -54,4 +57,3 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
-
