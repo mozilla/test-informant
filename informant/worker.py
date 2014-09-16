@@ -46,7 +46,8 @@ class Worker(threading.Thread):
             build_queue.task_done()
 
     def process_build(self, data):
-        build_str = "{}-{}-{}".format(data['buildid'], data['platform'], data['buildtype'])
+        platform = '{}-{}'.format(data['platform'], data['buildtype'])
+        build_str = "{}-{}-{}".format(data['buildid'], platform)
         self.log("now processing build '{}'".format(build_str))
 
         # some platforms (i.e android, b2g) have a different set of xpcshell manifests
@@ -74,7 +75,7 @@ class Worker(threading.Thread):
                 revision=data['revision'],
             )
 
-            for suite in config.PLATFORMS[(data['platform'], data['buildtype'])]:
+            for suite in config.PLATFORMS[platform]:
                 manifests = [os.path.join(tests_path, m) for m in config.SUITES[suite]['manifests']]
                 parse = config.SUITES[suite]['parser']()
 

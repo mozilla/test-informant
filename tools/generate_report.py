@@ -40,25 +40,55 @@ class TestInformantReport(object):
         order_by = '+timestamp' if first else '-timestamp'
             
         for platform in PLATFORMS.keys():
-            build = Build.objects(
-                platform=platform[0],
-                buildtype=platform[1],
+            p = platform.split('-')
+            query_set = Build.objects(
+                platform=p[0],
+                buildtype=p[1],
                 timestamp__gte=ts_range[0],
                 timestamp__lte=ts_range[1],
-            ).order_by(order_by).limit(1)[0]
-            
+            ).order_by(order_by).limit(1)
+
+            if not query_set:
+                continue
+
+            build = query_set[0]
             for suite in build.suites:
-                raw_data[suite.name][platform] = { 'active_tests': suite.active_tests,
-                                                   'skipped_tests': suite.skipped_tests, }
+                raw_data[suite.name][platform] = { 'active': suite.active_tests,
+                                                   'skipped': suite.skipped_tests, }
         return raw_data
 
     def generate(self, from_date, to_date):
         print("Comparing tests from {} to {}".format(from_date, to_date))
-
         from_data = self.query_date(from_date, first=True)
         to_data = self.query_date(to_date, first=False)
+        return from_data, to_data
 
+    def _format_by_suite(self, from_data, to_data):
+        output = []
+        for suite, platforms in to_data.iteritems():
+            output.append('* {}'.format(suite))
 
+            for platform, tests in platforms.iteritems():
+                output.append('** {}'.format(platform))
+                output.append('   total tests: {}'.format(len(tests['active']) + len(tests['skipped'])))
+                output.append('   active tests: {}'.format(len(tests['active'])))
+                output.append('   skipped tests: {}'.format(len(tests['skipped'])))
+
+                added = [t for t in tests['active'] if t not in from_data[suite][platform]['active']]
+                skipped = [t for t in tests['skipped'] if t not in from_data[suite][platform]['skipped']]
+                output.append('   {} tests were added:'.format(len(added)))
+                output.extend(['   \t{}'.format(t) for t in added])
+                output.append('   {} tests were skipped:'.format(len(skipped)))
+                output.extend(['   \t{}'.format(t) for t in skipped])
+        return '\n'.join(output)
+
+    def _format_by_platform(self):
+        pass
+
+    def format_data(self, from_data, to_data, order='suite'):
+        if order == 'suite':
+            return self._format_by_suite(from_data, to_data)
+        return self._format_by_platform(from_data, to_data)
 
 
 def cli(args=sys.argv[1:]):
@@ -79,6 +109,11 @@ def cli(args=sys.argv[1:]):
                         dest='to_date',
                         default=None,
                         help='Date to compare to, in the form YYYY-MM-DD.')
+    parser.add_argument('--order-by',
+                        dest='order',
+                        choices=['platform', 'suite'],
+                        default='suite',
+                        help='Summarize report by suite or by platform.')
     args = vars(parser.parse_args(args))
 
     if args['to_date'] and not args['from_date']:
@@ -92,8 +127,11 @@ def cli(args=sys.argv[1:]):
         today = datetime.date.today()
         args['to_date'] = today.strftime('%Y-%m-%d')
 
+    order = args.pop('order')
     report = TestInformantReport(args.pop('db_name'), args.pop('db_server'))
-    output = report.generate(**args)
+    data = report.generate(**args)
+
+    print(report.format_data(*data, order=order))
 
 
 if __name__ == '__main__':
