@@ -20,7 +20,6 @@ class HTMLFormatter(BaseFormatter):
                                loader=PackageLoader('tools.formatters', 'templates'))
 
     def _format_by_suite(self, report):
-        #print(json.dumps(to_data['marionette'], indent=2))
         data = defaultdict(recursivedict)
 
         from_suites = report.from_data['suites']

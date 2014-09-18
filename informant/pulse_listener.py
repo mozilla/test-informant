@@ -31,6 +31,10 @@ def on_build_event(data, message):
     if 'l10n' in payload['tags']:
         return
 
+    # skip builds that don't have any tests
+    if not payload['testsurl']:
+        return
+
     # skip builds without any supported suites running against them
     platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
     if platform not in config.PLATFORMS:

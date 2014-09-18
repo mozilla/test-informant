@@ -30,26 +30,36 @@ class ReportGenerator(object):
         mongoengine.connect(db_name, host=host, port=int(port))
 
     def get_builds(self, date, first=True):
+        # calculate timestamp range of date
         epoch = datetime.datetime.fromtimestamp(0)
         d = datetime.datetime(*[int(i) for i in date.split('-')])
         since_epoch = (d - epoch).total_seconds()
-        ts_range = (since_epoch, since_epoch + 86400) # seconds in a day
+        ts_range = (since_epoch, since_epoch + 86400) # 86400 seconds in a day
 
+        # find all builds within the timestamp range
         order_by = '+timestamp' if first else '-timestamp'
         builds = Build.objects(
             timestamp__gte=ts_range[0],
-            timestamp__lte=ts_range[1],
+            timestamp__lt=ts_range[1],
         ).order_by(order_by)
 
-        # find the revision with the most builds associated with it
+        # Find the revisions with the most builds associated with it.
+        # We do this to exclude revisions for which only a small portion of
+        # builds have finished, or for which some builds were started the
+        # previous day and some the current day.
         common = Counter([b.revision for b in builds]).most_common()
         common = [c[0] for c in common if c[1] == common[0][1]]
 
+        # Counter returns ties in arbitrary order, find the revision that appears
+        # first in the build list
         for build in builds:
             if build.revision in common:
                 revision = build.revision
                 break
-        return [b for b in builds if b.revision == revision]
+
+        # return all builds with that revision, regardless of whether or not they
+        # are within the timestamp range
+        return Build.objects(revision=revision)
 
     def query_date(self, date, first=True):
         """
@@ -57,8 +67,8 @@ class ReportGenerator(object):
         json dump of the results.
 
         :param date: Date to perform query on, of the form 'YYYY-MM-DD'.
-        :param first: If True, use the first build from each platform on that day.
-                      Otherwise, use the last build.
+        :param first: If True, use the first good revision from each platform on that day.
+                      Otherwise, use the last good revision.
         """
         builds = self.get_builds(date, first=first)
 
