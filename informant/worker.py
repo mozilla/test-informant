@@ -82,6 +82,13 @@ class Worker(threading.Thread):
                 # perform the actual manifest parsing
                 active, skipped = parse(manifests, mozinfo_json)
 
+                # compute test paths relative to topsrcdir
+                # XXX assumes the relative topsrcdir is in '<suite>/tests', so far this is
+                # true, but might be good to explicitly define this per suite in the config.
+                relpath = os.path.join(tests_path, suite, 'tests')
+                active = [os.path.relpath(t, relpath) for t in active]
+                skipped = [os.path.relpath(t, relpath) for t in skipped]
+
                 # keep track of totals for the entire build across all test suites
                 build.total_active_tests += len(active)
                 build.total_skipped_tests += len(skipped)
@@ -95,6 +102,7 @@ class Worker(threading.Thread):
                 s.refcount += 1
                 s.save()
                 build.suites.append(s)
+            # commit to db
             build.save()
         finally:
             if not use_cache:
