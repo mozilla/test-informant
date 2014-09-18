@@ -22,28 +22,33 @@ class HTMLFormatter(BaseFormatter):
     def _format_by_suite(self, report):
         #print(json.dumps(to_data['marionette'], indent=2))
         data = defaultdict(recursivedict)
-        for suite, platforms in report.to_results.iteritems():
+
+        from_suites = report.from_data['suites']
+        to_suites = report.to_data['suites']
+        for suite, platforms in to_suites.iteritems():
             for platform, tests in platforms.iteritems():
-                added = [t for t in tests['active'] if t not in report.from_results[suite][platform]['active']]
-                removed = [t for t in tests['skipped'] if t not in report.from_results[suite][platform]['skipped']]
+                added = [t for t in tests['active'] if t not in from_suites[suite][platform]['active']]
+                removed = [t for t in tests['skipped'] if t not in from_suites[suite][platform]['skipped']]
 
                 data[suite][platform]['total'] =  len(tests['active']) + len(tests['skipped'])
                 data[suite][platform]['active'] = len(tests['active'])
-                data[suite][platform]['skipped'] = len(tests['skipped'])
+                data[suite][platform]['skipped'] = tests['skipped']
                 data[suite][platform]['added'] = added
                 data[suite][platform]['removed'] = removed
 
         context = {
             'suites': data,
-            'from_date': report.from_date,
-            'to_date': report.to_date,
+            'from_date': report.from_data['date'],
+            'from_revision': report.from_data['revision'],
+            'to_date': report.to_data['date'],
+            'to_revision': report.to_data['revision'],
         }
 
         template = self.env.get_template('report.html')
         return template.render(context)
 
     def _format_by_platform(self, report):
-        pass
+        raise NotImplementedError
 
     def format_report(self, report, order='suite'):
         if order == 'suite':

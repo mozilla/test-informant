@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 import argparse
 import datetime
 import sys
@@ -14,12 +14,13 @@ from informant.models import Build
 
 from .formatters import HTMLFormatter
 
+recursivedict = lambda: defaultdict(recursivedict)
+
 class Report(object):
-    def __init__(self, f_date, t_date, f_res, t_res):
-        self.from_date = f_date
-        self.from_results = f_res
-        self.to_date = t_date
-        self.to_results = t_res
+    """Simple container class"""
+    def __init__(self, **kwargs):
+        for k, v in kwargs.iteritems():
+            setattr(self, k, v)
 
 
 class ReportGenerator(object):
@@ -28,11 +29,27 @@ class ReportGenerator(object):
         host, port = db_server.split(':')
         mongoengine.connect(db_name, host=host, port=int(port))
 
-    def get_timestamp_range(self, date):
+    def get_builds(self, date, first=True):
         epoch = datetime.datetime.fromtimestamp(0)
         d = datetime.datetime(*[int(i) for i in date.split('-')])
         since_epoch = (d - epoch).total_seconds()
-        return since_epoch, since_epoch + 86400 # seconds in a day
+        ts_range = (since_epoch, since_epoch + 86400) # seconds in a day
+
+        order_by = '+timestamp' if first else '-timestamp'
+        builds = Build.objects(
+            timestamp__gte=ts_range[0],
+            timestamp__lte=ts_range[1],
+        ).order_by(order_by)
+
+        # find the revision with the most builds associated with it
+        common = Counter([b.revision for b in builds]).most_common()
+        common = [c[0] for c in common if c[1] == common[0][1]]
+
+        for build in builds:
+            if build.revision in common:
+                revision = build.revision
+                break
+        return [b for b in builds if b.revision == revision]
 
     def query_date(self, date, first=True):
         """
@@ -43,34 +60,32 @@ class ReportGenerator(object):
         :param first: If True, use the first build from each platform on that day.
                       Otherwise, use the last build.
         """
-        raw_data = defaultdict(dict)
+        builds = self.get_builds(date, first=first)
 
-        ts_range = self.get_timestamp_range(date)
-        order_by = '+timestamp' if first else '-timestamp'
+        raw_data = defaultdict(recursivedict)
+        raw_data['revision'] = builds[0].revision
+        raw_data['date'] = date
 
-        for platform in PLATFORMS.keys():
-            p = platform.split('-')
-            query_set = Build.objects(
-                platform=p[0],
-                buildtype=p[1],
-                timestamp__gte=ts_range[0],
-                timestamp__lte=ts_range[1],
-            ).order_by(order_by).limit(1)
+        for build in builds:
+            platform = '{}-{}'.format(build.platform, build.buildtype)
 
-            if not query_set:
-                continue
-
-            build = query_set[0]
             for suite in build.suites:
-                raw_data[suite.name][platform] = { 'active': suite.active_tests,
-                                                   'skipped': suite.skipped_tests, }
+                raw_data['suites'][suite.name][platform] = {
+                    'active': suite.active_tests,
+                    'skipped': suite.skipped_tests,
+                }
         return raw_data
 
     def __call__(self, from_date, to_date):
         print("Comparing tests from {} to {}".format(from_date, to_date))
-        from_results = self.query_date(from_date, first=True)
-        to_results = self.query_date(to_date, first=False)
-        return Report(from_date, to_date, from_results, to_results)
+        from_data = self.query_date(from_date, first=True)
+        to_data = self.query_date(to_date, first=False)
+
+        report_data = {
+            'from_data': from_data,
+            'to_data': to_data,
+        }
+        return Report(**report_data)
 
 
 def cli(args=sys.argv[1:]):
