@@ -81,7 +81,7 @@ class Worker(threading.Thread):
                 parse = suite['parser']()
 
                 # perform the actual manifest parsing
-                active, skipped = parse(manifests, mozinfo_json, subsuite=suite.get('subsuite'))
+                active, skipped = parse(manifests, mozinfo_json)
 
                 # compute test paths relative to topsrcdir
                 relpath = os.path.join(tests_path, suite['relpath'])

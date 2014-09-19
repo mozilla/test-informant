@@ -43,12 +43,6 @@ SUITES = {
         'parser': IniParser,
         'relpath': 'mochitest/chrome',
     },
-    'mochitest-devtools': {
-        'manifests': ['mochitest/browser/browser-chrome.ini'],
-        'parser': IniParser,
-        'relpath': 'mochitest/browser',
-        'subsuite': 'devtools',
-    },
     'mochitest-plain': {
         'manifests': ['mochitest/tests/mochitest.ini'],
         'parser': IniParser,
@@ -68,14 +62,14 @@ SUITES = {
 
 # a mapping from plaform type to enabled suites.
 PLATFORMS = {
-    'linux-opt':           ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
-    'linux-debug':         ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
-    'linux64-opt':         ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
-    'linux64-debug':       ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
-    'macosx64-opt':        ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
-    'macosx64-debug':      ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
-    'win32-opt':           ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
-    'win32-debug':         ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-devtools', 'mochitest-plain', 'xpcshell',],
+    'linux-opt':           ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
+    'linux-debug':         ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
+    'linux64-opt':         ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
+    'linux64-debug':       ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
+    'macosx64-opt':        ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
+    'macosx64-debug':      ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
+    'win32-opt':           ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
+    'win32-debug':         ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
     'android-opt':         ['mochitest-plain', 'xpcshell-android',],
     'linux32_gecko-opt':   ['mochitest-plain',],
     'linux64_gecko-debug': ['mochitest-plain',] ,
