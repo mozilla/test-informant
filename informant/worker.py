@@ -83,7 +83,7 @@ class Worker(threading.Thread):
                 active, skipped = parse(manifests, mozinfo_json)
 
                 # compute test paths relative to topsrcdir
-                relpath = os.path.join(tests_path, suite['relpath'])
+                relpath = os.path.join(tests_path, config.SUITES[suite]['relpath'])
                 active = [os.path.relpath(t, relpath) for t in active]
                 skipped = [os.path.relpath(t, relpath) for t in skipped]
 

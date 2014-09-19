@@ -87,7 +87,13 @@ class ReportGenerator(object):
         builds = self.get_builds(date, first=first)
 
         raw_data = defaultdict(recursivedict)
-        raw_data['revision'] = builds[0].revision
+        # try to use the long form revision if possible
+        for b in builds:
+            if len(b.revision) > 12:
+                raw_data['revision'] = b.revision
+                break
+        else:
+            raw_data['revision'] = builds[0].revision
         raw_data['date'] = date
 
         for build in builds:
