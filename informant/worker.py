@@ -83,9 +83,7 @@ class Worker(threading.Thread):
                 active, skipped = parse(manifests, mozinfo_json)
 
                 # compute test paths relative to topsrcdir
-                # XXX assumes the relative topsrcdir is in '<suite>/tests', so far this is
-                # true, but might be good to explicitly define this per suite in the config.
-                relpath = os.path.join(tests_path, suite, 'tests')
+                relpath = os.path.join(tests_path, suite['relpath'])
                 active = [os.path.relpath(t, relpath) for t in active]
                 skipped = [os.path.relpath(t, relpath) for t in skipped]
 

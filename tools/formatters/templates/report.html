@@ -34,6 +34,11 @@
             list-style: none;
         }
 
+        label > span:last-child {
+            float: right;
+            padding-right: 20px;
+        }
+
         li .menu_label + input[type=checkbox] {
             display: none;
         }
@@ -55,10 +60,29 @@
 
         li .menu_label + input[type=checkbox] + ol > li {
             display: none;
+            width: 96%;
         }
 
         li .menu_label + input[type=checkbox]:checked + ol > li {
             display: block;
+        }
+
+        li .menu_label + input[type=checkbox] + ol > li > div {
+            background-color: #F5F5F5;
+            border-radius: 5px;
+            border-top: 1px solid grey;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        li .menu_label + input[type=checkbox] + ol > li > div > p {
+            margin: 0;
+            padding-left: 13px;
+        }
+
+        li .menu_label + input[type=checkbox] + ol > li > div > p > a {
+            color: black;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -69,14 +93,14 @@
         <h2>Test Report for {{ to_date }}</h2>
         <div>State of test manifests at revision <a href="http://hg.mozilla.org/mozilla-central/rev/{{ to_revision }}">{{ to_revision }}</a>.</div>
         <div>Using revision <a href="http://hg.mozilla.org/mozilla-central/rev/{{ from_revision }}">{{ from_revision }}</a> as a baseline for comparisons.</div>
-        <div>Showing tests added or removed between <a href="https://hg.mozilla.org/mozilla-central/pushloghtml?fromchange={{ from_revision }}&tochange={{ to_revision }}">{{ from_date }} - {{ to_date }}</a>.</div>
-        <div>{{ (total_active/total_tests*100)|round|int }}% of all tests across all configurations are enabled.</div>
+        <div>Showing tests added or removed between <a href="https://hg.mozilla.org/mozilla-central/pushloghtml?fromchange={{ from_revision }}&tochange={{ to_revision }}">{{ from_date }} and {{ to_date }}</a>.</div>
+        <div>{{ (total_active/total_tests*100)|round|int }}% of all tests across all suites and configurations are enabled.</div>
     </div>
     <div id="data">
         <ol id='menutree'>
         {% for suite, platforms in suites|dictsort %}
             <li>
-            <label class="menu_label" for={{ suite }}>{{ suite }} - {{ (platforms.meta.active/platforms.meta.total*100)|round|int }}%</label>
+            <label class="menu_label" for="{{ suite }}"><span>{{ suite }}</span><span>{{ (platforms.meta.active/platforms.meta.total*100)|round|int }}%</span></label>
                 <input type="checkbox" id="{{ suite }}" />
                 <ol>
                 {% for platform, data in platforms|dictsort %}
@@ -85,36 +109,52 @@
                     {% continue %}
                 {% endif %}
                     <li>
-                        <label class="menu_label" for="{{ suite }}-{{ platform }}">{{ platform }} - {{ (data.active/data.total*100)|round|int }}%</label>
+                        <label class="menu_label" for="{{ suite }}-{{ platform }}"><span>{{ platform }}</span><span>{{ (data.active/data.total*100)|round|int }}%</span></label>
                         <input type="checkbox" id="{{ suite }}-{{ platform }}" />
                         <ol>
-                            <li>total tests: {{ data.total }}</li>
-                            <li>active tests: {{ data.active }}</li>
+                            <li>
+                                <div>
+                                    <p>total tests: {{ data.total }}</p>
+                                    <p>active tests: {{ data.active }}</p>
+                                </div>
+                            </li>
                             <li>
                                 <label class="menu_label" for="{{ suite }}-{{ platform }}-skipped">skipped tests: {{ data.skipped|length }}</label>
                                 <input type="checkbox" id="{{ suite }}-{{ platform }}-skipped" />
                                 <ol>
-                                {% for test in data.skipped %}
-                                    <li>{{ test }}</li>
-                                {% endfor %}
+                                    <li>
+                                        <div>
+                                        {% for test in data.skipped %}
+                                        <p><a href="http://dxr.mozilla.org/mozilla-central/source/{{ test }}">{{ test }}</a></p>
+                                        {% endfor %}
+                                        </div>
+                                    </li>
                                 </ol>
                             </li>
                             <li>
                                 <label class="menu_label" for="{{ suite }}-{{ platform }}-added">tests added since {{ from_date }}: {{ data.added|length }}</label>
                                 <input type="checkbox" id="{{ suite }}-{{ platform }}-added" />
                                 <ol>
-                                {% for test in data.added %}
-                                    <li>{{ test }}</li>
-                                {% endfor %}
+                                    <li>
+                                        <div>
+                                        {% for test in data.added %}
+                                            <p><a href="http://dxr.mozilla.org/mozilla-central/source/{{ test }}">{{ test }}</a></p>
+                                        {% endfor %}
+                                        </div>
+                                    </li>
                                 </ol>
                             </li>
                             <li>
                                 <label class="menu_label" for="{{ suite }}-{{ platform }}-removed">tests removed since {{ from_date }}: {{ data.removed|length }}</label>
                                 <input type="checkbox" id="{{ suite }}-{{ platform }}-removed" />
                                 <ol>
-                                {% for test in data.removed %}
-                                    <li>{{ test }}</li>
-                                {% endfor %}
+                                    <li>
+                                        <div>
+                                        {% for test in data.removed %}
+                                            <p><a href="http://dxr.mozilla.org/mozilla-central/source/{{ test }}">{{ test }}</a></p>
+                                        {% endfor %}
+                                        </div>
+                                    </li>
                                 </ol>
                             </li>
                         </ol>

@@ -26,18 +26,22 @@ SUITES = {
     'marionette': {
         'manifests': ['marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini'],
         'parser': IniParser,
+        'relpath': 'marionette/tests',
     },
     'mochitest-plain': {
         'manifests': ['mochitest/tests/mochitest.ini'],
         'parser': IniParser,
+        'relpath': 'mochitest/tests',
     },
     'xpcshell': {
         'manifests': ['xpcshell/tests/xpcshell.ini'],
         'parser': IniParser,
+        'relpath': 'xpcshell/tests',
     },
     'xpcshell-android': {
         'manifests': ['xpcshell/tests/xpcshell_android.ini'],
         'parser': IniParser,
+        'relpath': 'xpcshell/tests',
     },
 }
 

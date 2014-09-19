@@ -33,7 +33,7 @@ class HTMLFormatter(BaseFormatter):
 
             for platform, tests in platforms.iteritems():
                 added = [t for t in tests['active'] if t not in from_suites[suite][platform]['active']]
-                removed = [t for t in tests['skipped'] if t not in from_suites[suite][platform]['skipped']]
+                removed = [t for t in from_suites[suite][platform]['active'] if t not in tests['active']]
 
                 data[suite][platform]['total'] =  len(tests['active']) + len(tests['skipped'])
                 data[suite][platform]['active'] = len(tests['active'])
