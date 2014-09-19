@@ -8,26 +8,29 @@
             margin: 0;
         }
 
+        #content {
+            margin-left: 5%;
+            max-width: 50%;
+        }
+
         #header {
             background-color: #FCD6AC;
+            border-radius: 5px;
             min-height: 200px;
+            text-align: center;
         }
 
         #header > h2 {
-            padding-top: 10px;
-            padding-left: 20px;
+            padding-top: 20px;
         }
 
-        #content {
-            background-color: #C3DFE8;
+        #header > div {
+            margin-top: 2px;
         }
 
         #menutree {
             margin: 0;
-        }
-
-        // Collapsible lists
-        #menutree li {
+            padding:0;
             list-style: none;
         }
 
@@ -36,7 +39,18 @@
         }
 
         li .menu_label {
+            background-color: #C3DFE8;
+            border-radius: 5px;
+            border-top: 1px solid grey;
             cursor: pointer;
+            display: block;
+            padding-left: 15px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        li .menu_label:hover {
+            background-color: #F7ECBC;
         }
 
         li .menu_label + input[type=checkbox] + ol > li {
@@ -50,21 +64,26 @@
 </head>
 
 <body>
+<div id="content">
     <div id="header">
         <h2>Test Report for {{ to_date }}</h2>
-        <div>revision: {{ to_revision }}</div>
-        <div><a href="https://hg.mozilla.org/mozilla-central/pushloghtml?fromchange={{ from_revision }}&tochange={{ to_revision }}">pushlog</a></div>
+        <div>State of test manifests at revision <a href="http://hg.mozilla.org/mozilla-central/rev/{{ to_revision }}">{{ to_revision }}</a>.</div>
+        <div>Using revision <a href="http://hg.mozilla.org/mozilla-central/rev/{{ from_revision }}">{{ from_revision }}</a> as a baseline for comparisons.</div>
+        <div>Showing tests added or removed between <a href="https://hg.mozilla.org/mozilla-central/pushloghtml?fromchange={{ from_revision }}&tochange={{ to_revision }}">{{ from_date }} - {{ to_date }}</a>.</div>
+        <div>{{ (total_active/total_tests*100)|round|int }}% of all tests across all configurations are enabled.</div>
     </div>
-    <div id="content">
+    <div id="data">
         <ol id='menutree'>
         {% for suite, platforms in suites|dictsort %}
             <li>
-                <label class="menu_label" for={{ suite }}>{{ suite }}</label>
+            <label class="menu_label" for={{ suite }}>{{ suite }} - {{ (platforms.meta.active/platforms.meta.total*100)|round|int }}%</label>
                 <input type="checkbox" id="{{ suite }}" />
                 <ol>
                 {% for platform, data in platforms|dictsort %}
+                {% if platform == "meta" %}
+                {% endif %}
                     <li>
-                        <label class="menu_label" for="{{ suite }}-{{ platform }}">{{ platform }}</label>
+                        <label class="menu_label" for="{{ suite }}-{{ platform }}">{{ platform }} - {{ (data.active/data.total*100)|round|int }}%</label>
                         <input type="checkbox" id="{{ suite }}-{{ platform }}" />
                         <ol>
                             <li>total tests: {{ data.total }}</li>
@@ -104,5 +123,6 @@
         {% endfor %}
         </ol>
     </div>
+</div>
 </body>
 </html>
