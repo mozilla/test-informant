@@ -26,18 +26,12 @@ def on_build_event(data, message):
     # ack the message to remove it from the queue
     message.ack()
     payload = data['payload']
-
-    # skip l10n builds
-    if 'l10n' in payload['tags']:
-        return
-
-    # skip builds that don't have any tests
-    if not payload['testsurl']:
-        return
-
-    # skip builds without any supported suites running against them
     platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
-    if platform not in config.PLATFORMS:
+
+    if any(('l10n' in payload['tags'],          # skip l10n builds
+            'nightly' in payload['tags'],       # skip nightly builds
+            not payload['testsurl'],            # skip builds that don't have any tests
+            platform not in config.PLATFORMS)): # skip builds without any supported suites
         return
 
     try:
