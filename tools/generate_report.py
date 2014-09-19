@@ -30,6 +30,15 @@ class ReportGenerator(object):
         mongoengine.connect(db_name, host=host, port=int(port))
 
     def get_builds(self, date, first=True):
+        """
+        Takes a date and returns a list of Build objects from that
+        date and that all have the same revision.
+
+        :param date: Date of the form YYYY-MM-DD.
+        :param first: If true, returns the earliest builds from date.
+                      Otherwise, returns the latest builds from date.
+        :returns: A list of Build objects from the same revision.
+        """
         # calculate timestamp range of date
         epoch = datetime.datetime.fromtimestamp(0)
         d = datetime.datetime(*[int(i) for i in date.split('-')])
@@ -43,23 +52,27 @@ class ReportGenerator(object):
             timestamp__lt=ts_range[1],
         ).order_by(order_by)
 
+        # pulse seems to use the short form revision for some builds, and the
+        # long form for others. Solve this by always using the short form.
+        revisions = [b.revision[:12] for b in builds]
         # Find the revisions with the most builds associated with it.
         # We do this to exclude revisions for which only a small portion of
         # builds have finished, or for which some builds were started the
         # previous day and some the current day.
-        common = Counter([b.revision for b in builds]).most_common()
+        common = Counter(revisions).most_common()
+        # strip the counts and non-maximal revisions
         common = [c[0] for c in common if c[1] == common[0][1]]
 
         # Counter returns ties in arbitrary order, find the revision that appears
-        # first in the build list
+        # first in the build list.
         for build in builds:
-            if build.revision in common:
-                revision = build.revision
+            if build.revision[:12] in common:
+                revision = build.revision[:12]
                 break
 
         # return all builds with that revision, regardless of whether or not they
-        # are within the timestamp range
-        return Build.objects(revision=revision)
+        # are within the timestamp range.
+        return Build.objects(revision__startswith=revision)
 
     def query_date(self, date, first=True):
         """
@@ -69,6 +82,7 @@ class ReportGenerator(object):
         :param date: Date to perform query on, of the form 'YYYY-MM-DD'.
         :param first: If True, use the first good revision from each platform on that day.
                       Otherwise, use the last good revision.
+        :returns: A json dump of the data from date.
         """
         builds = self.get_builds(date, first=first)
 
@@ -87,6 +101,13 @@ class ReportGenerator(object):
         return raw_data
 
     def __call__(self, from_date, to_date):
+        """
+        Generates a report from a date range.
+
+        :param from_date: Date at the beginning of the range, of the form YYYY-MM-DD.
+        :param to_date: Date at the end of the range, of the form YYYY-MM-DD.
+        :returns: A Report object with two attributes, 'from_data' and 'to_data'.
+        """
         print("Comparing tests from {} to {}".format(from_date, to_date))
         from_data = self.query_date(from_date, first=True)
         to_data = self.query_date(to_date, first=False)

@@ -80,7 +80,9 @@
                 <input type="checkbox" id="{{ suite }}" />
                 <ol>
                 {% for platform, data in platforms|dictsort %}
+                <!-- meta is a hack to make the percentage available to each suite, don't actually display it. -->
                 {% if platform == "meta" %}
+                    {% continue %}
                 {% endif %}
                     <li>
                         <label class="menu_label" for="{{ suite }}-{{ platform }}">{{ platform }} - {{ (data.active/data.total*100)|round|int }}%</label>
