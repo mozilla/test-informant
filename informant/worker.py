@@ -75,15 +75,16 @@ class Worker(threading.Thread):
                 revision=data['revision'],
             )
 
-            for suite in config.PLATFORMS[platform]:
-                manifests = [os.path.join(tests_path, m) for m in config.SUITES[suite]['manifests']]
-                parse = config.SUITES[suite]['parser']()
+            for suite_name in config.PLATFORMS[platform]:
+                suite = config.SUITES[suite_name]
+                manifests = [os.path.join(tests_path, m) for m in suite['manifests']]
+                parse = suite['parser']()
 
                 # perform the actual manifest parsing
-                active, skipped = parse(manifests, mozinfo_json)
+                active, skipped = parse(manifests, mozinfo_json, subsuite=suite.get('subsuite'))
 
                 # compute test paths relative to topsrcdir
-                relpath = os.path.join(tests_path, config.SUITES[suite]['relpath'])
+                relpath = os.path.join(tests_path, suite['relpath'])
                 active = [os.path.relpath(t, relpath) for t in active]
                 skipped = [os.path.relpath(t, relpath) for t in skipped]
 
@@ -93,7 +94,7 @@ class Worker(threading.Thread):
 
                 # don't store multiple copies of the same result
                 s, created = Suite.objects.get_or_create(
-                    name=suite,
+                    name=suite_name,
                     active_tests=active,
                     skipped_tests=skipped,
                 )

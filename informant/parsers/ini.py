@@ -10,13 +10,18 @@ from .base import AbstractParser
 
 class IniParser(AbstractParser):
 
-    def __call__(self, manifests, buildconfig):
+    def __call__(self, manifests, buildconfig, subsuite=None):
         if not isinstance(manifests, Iterable):
             manifests = [manifests]
 
+        # use empty method as a container
+        def options():
+            pass
+        options.subsuite = subsuite
+
         m = TestManifest(manifests)
 
-        active = [t['path'] for t in m.active_tests(exists=False, disabled=False, **buildconfig)]
+        active = [t['path'] for t in m.active_tests(exists=False, disabled=False, options=options, **buildconfig)]
         skipped = [t['path'] for t in m.tests if t['path'] not in active]
 
         return active, skipped
