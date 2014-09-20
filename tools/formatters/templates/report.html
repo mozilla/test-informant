@@ -14,8 +14,10 @@
         }
 
         #content {
-            margin-left: 5%;
-            max-width: 50%;
+            margin-left: 20px;
+            margin-right: 20px;
+            max-width: 1150px;
+            min-width: 510px;
         }
 
         #header {
@@ -64,9 +66,14 @@
             background-color: #F7ECBC;
         }
 
+        li .menu_label + input[type=checkbox] + ol {
+            padding-left: 10%;
+        }
+
         li .menu_label + input[type=checkbox] + ol > li {
             display: none;
-            width: 96%;
+            width: 100%;
+            margin-left: -5.5%;
         }
 
         li .menu_label + input[type=checkbox]:checked + ol > li {
@@ -115,7 +122,6 @@
                 <input type="checkbox" id="{{ suite }}" />
                 <ol>
                 {% for platform, data in platforms|dictsort %}
-                <!-- meta is a hack to make the percentage available to each suite, don't actually display it. -->
                 {% if platform == "meta" %}
                     {% continue %}
                 {% endif %}
