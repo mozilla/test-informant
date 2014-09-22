@@ -81,7 +81,6 @@ def run():
             except IOError: # sometimes socket gets closed
                 pass
     except KeyboardInterrupt:
-        pulse.delete_queue()
         print("Waiting for threads to finish processing, press Ctrl-C again to exit now...")
         try:
             # do this instead of Queue.join() so KeyboardInterrupts get caught
@@ -90,6 +89,9 @@ def run():
         except KeyboardInterrupt:
             sys.exit(1)
     finally:
+        if pulse_args['durable'] and pulse_args['applabel'] == label:
+            pulse.delete_queue()
+
         print("Threads finished, cleaning up tests cache...")
         # clean up leftover tests bundles
         for v in tests_cache.values():
