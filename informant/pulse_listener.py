@@ -5,6 +5,7 @@
 
 from __future__ import print_function, unicode_literals
 
+from ConfigParser import ConfigParser
 from Queue import Full
 import os
 import shutil
@@ -53,12 +54,25 @@ def run():
         worker = Worker()
         worker.start()
 
-    # Connect to pulse
     label = 'test-informant-{}'.format(uuid.uuid4())
     topic = 'build.{}.#'.format(config.BRANCH)
-    pulse = NormalizedBuildConsumer(applabel=label)
-    pulse.configure(topic=topic, callback=on_build_event)
 
+    # defaults
+    pulse_args = {
+        'applabel': label,
+        'topic': topic,
+    }
+    # override defaults with a ~/.pulserc
+    config_file = os.path.expanduser('~/.pulserc')
+    if os.path.isfile(config_file):
+        cp = ConfigParser()
+        cp.read(config_file)
+        pulse_args.update(dict(cp.items('pulse')))
+        if 'durable' in pulse_args:
+            pulse_args['durable'] = pulse_args['durable'].lower() in ('true', '1', 'yes', 'on')
+
+    # Connect to pulse
+    pulse = NormalizedBuildConsumer(callback=on_build_event, **pulse_args)
     try:
         while True:
             print("Listening on '{}'...".format(topic))
@@ -67,6 +81,7 @@ def run():
             except IOError: # sometimes socket gets closed
                 pass
     except KeyboardInterrupt:
+        pulse.delete_queue()
         print("Waiting for threads to finish processing, press Ctrl-C again to exit now...")
         try:
             # do this instead of Queue.join() so KeyboardInterrupts get caught
