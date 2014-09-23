@@ -61,6 +61,7 @@ def run():
     pulse_args = {
         'applabel': label,
         'topic': topic,
+        'durable': False,
     }
     # override defaults with a ~/.pulserc
     config_file = os.path.expanduser('~/.pulserc')
