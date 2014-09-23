@@ -33,4 +33,8 @@ setup(name='test-informant',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      install_requires=deps)
+      install_requires=deps,
+      entry_points="""
+        [console_scripts]
+        test-informant = informant.pulse_listener:run
+      """)
