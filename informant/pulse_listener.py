@@ -5,6 +5,7 @@
 
 from __future__ import print_function, unicode_literals
 
+from argparse import ArgumentParser
 from ConfigParser import ConfigParser
 from Queue import Full
 import os
@@ -45,7 +46,15 @@ def on_build_event(data, message):
         build_queue.put(payload, block=False)
 
 
-def run():
+def run(args=sys.argv[1:]):
+
+    parser = ArgumentParser()
+    parser.add_argument('--cfg',
+                        dest='config',
+                        default=os.path.expanduser('~/.pulserc'),
+                        help='Path to pulse configuration file.')
+    args = parser.parse_args(args)
+
     # Connect to db
     mongoengine.connect('test-informant')
 
@@ -64,10 +73,9 @@ def run():
         'durable': False,
     }
     # override defaults with a ~/.pulserc
-    config_file = os.path.expanduser('~/.pulserc')
-    if os.path.isfile(config_file):
+    if os.path.isfile(args.config):
         cp = ConfigParser()
-        cp.read(config_file)
+        cp.read(args.config)
         pulse_args.update(dict(cp.items('pulse')))
         if 'durable' in pulse_args:
             pulse_args['durable'] = pulse_args['durable'].lower() in ('true', '1', 'yes', 'on')
