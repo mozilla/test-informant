@@ -10,6 +10,7 @@ from ConfigParser import ConfigParser
 from Queue import Full
 import os
 import shutil
+import signal
 import sys
 import time
 import uuid
@@ -47,7 +48,6 @@ def on_build_event(data, message):
 
 
 def run(args=sys.argv[1:]):
-
     parser = ArgumentParser()
     parser.add_argument('--cfg',
                         dest='config',
@@ -80,6 +80,18 @@ def run(args=sys.argv[1:]):
         if 'durable' in pulse_args:
             pulse_args['durable'] = pulse_args['durable'].lower() in ('true', '1', 'yes', 'on')
 
+    def cleanup():
+        # delete the queue if durable set with a unique applabel
+        if pulse_args['durable'] and pulse_args['applabel'] == label:
+            pulse.delete_queue()
+
+        print("Threads finished, cleaning up tests cache...")
+        # clean up leftover tests bundles
+        for v in tests_cache.values():
+            if v and os.path.isdir(v):
+                shutil.rmtree(v)
+    signal.signal(signal.SIGTERM, cleanup)
+
     # Connect to pulse
     pulse = NormalizedBuildConsumer(callback=on_build_event, **pulse_args)
     try:
@@ -98,14 +110,7 @@ def run(args=sys.argv[1:]):
         except KeyboardInterrupt:
             sys.exit(1)
     finally:
-        if pulse_args['durable'] and pulse_args['applabel'] == label:
-            pulse.delete_queue()
-
-        print("Threads finished, cleaning up tests cache...")
-        # clean up leftover tests bundles
-        for v in tests_cache.values():
-            if v and os.path.isdir(v):
-                shutil.rmtree(v)
+        cleanup()
 
 
 if __name__ == "__main__":
