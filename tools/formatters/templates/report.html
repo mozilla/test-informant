@@ -109,7 +109,7 @@
         <br/>
         <div>State of test manifests at revision <a href="http://hg.mozilla.org/mozilla-central/rev/{{ to_revision }}">{{ to_revision }}</a>.</div>
         <div>Using revision <a href="http://hg.mozilla.org/mozilla-central/rev/{{ from_revision }}">{{ from_revision }}</a> as a baseline for comparisons.</div>
-        <div>Showing tests added or removed between <a href="https://hg.mozilla.org/mozilla-central/pushloghtml?fromchange={{ from_revision }}&tochange={{ to_revision }}">{{ from_date }} and {{ to_date }}</a>.</div>
+        <div>Showing tests enabled or disabled between <a href="https://hg.mozilla.org/mozilla-central/pushloghtml?fromchange={{ from_revision }}&tochange={{ to_revision }}">{{ from_date }} and {{ to_date }}</a>.</div>
         <br/>
         <div>{{ (total_active/total_tests*100)|round|int }}% of tests across all suites and configurations are enabled.</div>
         <br/>
@@ -149,7 +149,7 @@
                                 </ol>
                             </li>
                             <li>
-                                <label class="menu_label" for="{{ suite }}-{{ platform }}-added">tests added since {{ from_date }}: {{ data.added|length }}</label>
+                                <label class="menu_label" for="{{ suite }}-{{ platform }}-added">tests enabled since {{ from_date }}: {{ data.added|length }}</label>
                                 <input type="checkbox" id="{{ suite }}-{{ platform }}-added" />
                                 <ol>
                                     <li>
@@ -162,7 +162,7 @@
                                 </ol>
                             </li>
                             <li>
-                                <label class="menu_label" for="{{ suite }}-{{ platform }}-removed">tests removed since {{ from_date }}: {{ data.removed|length }}</label>
+                                <label class="menu_label" for="{{ suite }}-{{ platform }}-removed">tests disabled since {{ from_date }}: {{ data.removed|length }}</label>
                                 <input type="checkbox" id="{{ suite }}-{{ platform }}-removed" />
                                 <ol>
                                     <li>
