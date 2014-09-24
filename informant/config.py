@@ -18,8 +18,8 @@ NUM_WORKERS = cpu_count()
 # the number of builds allowed to queue up before they start getting dropped
 MAX_BUILD_QUEUE_SIZE = 100
 
-# the number of tests.zip bundles allowed on the filesystem at once
-MAX_TESTS_CACHE_SIZE = 20
+# the number of tests.zip bundles allowed on the filesystem at once, disabled by default
+MAX_TESTS_CACHE_SIZE = 0
 
 # a mapping from suite name to dict containing manifest path and parser type
 SUITES = {

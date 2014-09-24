@@ -50,13 +50,7 @@ class Worker(threading.Thread):
         build_str = "{}-{}".format(data['buildid'], platform)
         self.log("now processing build '{}'".format(build_str))
 
-        # some platforms (i.e android, b2g) have a different set of xpcshell manifests
-        # copied to the tests.zip.
-        use_cache = True
-        if data['platform'] in ('android',):
-            use_cache = False
-
-        tests_path = self._prepare_tests(data['revision'], data['testsurl'], use_cache=use_cache)
+        tests_path = self._prepare_tests(data['revision'], data['testsurl'])
         try:
             # compute mozinfo.json url based off the tests.zip url
             mozinfo_url = '{}.mozinfo.json'.format(data['testsurl'][:-len('.tests.zip')])
@@ -104,14 +98,15 @@ class Worker(threading.Thread):
             # commit to db
             build.save()
         finally:
-            if not use_cache:
+            if config.MAX_TESTS_CACHE_SIZE <= 0:
                 mozfile.remove(tests_path)
         self.log("finished processing build '{}'.".format(build_str))
 
     def log(self, message):
         print("{} - {}".format(self.name, message))
 
-    def _prepare_tests(self, revision, tests_url, use_cache=True):
+    def _prepare_tests(self, revision, tests_url):
+        use_cache = len(config.MAX_TESTS_CACHE_SIZE) > 0
         if use_cache and revision in tests_cache:
             # the tests bundle is possibly being downloaded by another thread,
             # wait a bit before downloading ourselves.
