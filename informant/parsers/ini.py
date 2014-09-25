@@ -12,7 +12,7 @@ from .base import AbstractParser
 logger = None
 
 class IniParser(AbstractParser):
-    def __call__(self, manifests, buildconfig, log_func):
+    def __call__(self, manifests, buildconfig):
         global logger
         logger = logger or structuredlog.get_default_logger()
 
@@ -20,7 +20,6 @@ class IniParser(AbstractParser):
             manifests = [manifests]
 
         m = TestManifest(manifests)
-        log_func("found {} total tests".format(len(m.tests)))
 
         active = [t['path'] for t in m.active_tests(exists=False, disabled=False, **buildconfig)]
         skipped = [t['path'] for t in m.tests if t['path'] not in active]
