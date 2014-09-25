@@ -14,6 +14,7 @@ import shutil
 import signal
 import sys
 import time
+import traceback
 import uuid
 
 from mozillapulse.consumers import NormalizedBuildConsumer
@@ -108,6 +109,7 @@ def run(args=sys.argv[1:]):
         for v in tests_cache.values():
             if v and os.path.isdir(v):
                 shutil.rmtree(v)
+        sys.exit(0)
     signal.signal(signal.SIGTERM, cleanup)
 
     # Connect to pulse
@@ -121,8 +123,10 @@ def run(args=sys.argv[1:]):
             logger.info("Listening on '{}'...".format(pulse_args['topic']))
             try:
                 pulse.listen()
-            except IOError: # sometimes socket gets closed
-                pass
+            except KeyboardInterrupt:
+                raise
+            except: # keep on listening
+                logger.debug(traceback.format_exc())
     except KeyboardInterrupt:
         logger.info("Waiting for threads to finish processing, press Ctrl-C again to exit now...")
         try:
