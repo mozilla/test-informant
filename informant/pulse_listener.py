@@ -80,12 +80,11 @@ def run(args=sys.argv[1:]):
         if 'durable' in pulse_args:
             pulse_args['durable'] = pulse_args['durable'].lower() in ('true', '1', 'yes', 'on')
 
-    def cleanup():
+    def cleanup(sig=None, frame=None):
         # delete the queue if durable set with a unique applabel
         if pulse_args['durable'] and pulse_args['applabel'] == label:
             pulse.delete_queue()
 
-        print("Threads finished, cleaning up tests cache...")
         # clean up leftover tests bundles
         for v in tests_cache.values():
             if v and os.path.isdir(v):
@@ -110,6 +109,7 @@ def run(args=sys.argv[1:]):
         except KeyboardInterrupt:
             sys.exit(1)
     finally:
+        print("Threads finished, cleaning up...")
         cleanup()
 
 
