@@ -17,7 +17,7 @@ import time
 import uuid
 
 from mozillapulse.consumers import NormalizedBuildConsumer
-from mozlog.structured import commandline, structuredlog
+from mozlog.structured import commandline
 import mongoengine
 
 from . import config
@@ -65,8 +65,7 @@ def run(args=sys.argv[1:]):
     args = parser.parse_args(args)
 
     global logger
-    logger = commandline.setup_logging("test-informant", args, {"mach": sys.stdout})
-    structuredlog.set_default_logger(logger)
+    logger = commandline.setup_logging("test-informant", args)
 
     # Print configuration info
     logger.info("Running test-informant")
