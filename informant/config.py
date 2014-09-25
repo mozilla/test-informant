@@ -9,8 +9,14 @@ from .parsers import IniParser
 # mongodb database name to connect to
 DB_NAME = 'test-informant'
 
+# mongodb host to connect to
+DB_HOST = 'localhost'
+
+# mongodb port to connect to
+DB_PORT = 27017
+
 # branch to listen for builds on
-BRANCH = 'mozilla-central'
+BRANCH = 'mozilla-inbound'
 
 # number of threads to spawn
 NUM_WORKERS = cpu_count()
@@ -72,6 +78,6 @@ PLATFORMS = {
     'win32-debug':         ['marionette', 'mochitest-a11y', 'mochitest-browser-chrome', 'mochitest-chrome', 'mochitest-plain', 'xpcshell',],
     'android-opt':         ['mochitest-plain', 'xpcshell-android',],
     'linux32_gecko-opt':   ['mochitest-plain',],
-    'linux64_gecko-debug': ['mochitest-plain',] ,
+    'linux64_gecko-opt':   ['mochitest-plain',] ,
     'mulet-opt':           ['mochitest-plain',],
 }

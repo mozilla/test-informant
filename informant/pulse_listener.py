@@ -8,6 +8,7 @@ from __future__ import print_function, unicode_literals
 from argparse import ArgumentParser
 from ConfigParser import ConfigParser
 from Queue import Full
+import json
 import os
 import shutil
 import signal
@@ -16,6 +17,7 @@ import time
 import uuid
 
 from mozillapulse.consumers import NormalizedBuildConsumer
+from mozlog.structured import commandline, structuredlog
 import mongoengine
 
 from . import config
@@ -25,11 +27,14 @@ from .worker import (
     tests_cache
 )
 
+logger = None
+
 def on_build_event(data, message):
     # ack the message to remove it from the queue
     message.ack()
     payload = data['payload']
     platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
+    logger.debug("Recieved build from pulse:\n{}".format(json.dumps(payload, indent=2)))
 
     if any(('l10n' in payload['tags'],          # skip l10n builds
             'nightly' in payload['tags'],       # skip nightly builds
@@ -37,13 +42,14 @@ def on_build_event(data, message):
             platform not in config.PLATFORMS)): # skip builds without any supported suites
         return
 
+    logger.info("Processing a '{}' build from revision {}".format(platform, payload['revision']))
     try:
         build_queue.put(payload, block=False)
     except Full:
         # if backlog is too big, discard oldest build
         # TODO discard platforms for which we have the most data
         discarded = build_queue.get()
-        print("Did not process buildid '{}', backlog too big!".format(discarded['buildid']))
+        logger.warning("Did not process buildid '{}', backlog too big!".format(discarded['buildid']))
         build_queue.put(payload, block=False)
 
 
@@ -53,12 +59,28 @@ def run(args=sys.argv[1:]):
                         dest='config',
                         default=os.path.expanduser('~/.pulserc'),
                         help='Path to pulse configuration file.')
+
+    commandline.log_formatters = { k: v for k, v in commandline.log_formatters.iteritems() if k in ('raw', 'mach') }
+    commandline.add_logging_group(parser)
     args = parser.parse_args(args)
 
+    global logger
+    logger = commandline.setup_logging("test-informant", args, {"mach": sys.stdout})
+    structuredlog.set_default_logger(logger)
+
+    # Print configuration info
+    logger.info("Running test-informant")
+    logger.debug("Max build_queue size: {}".format(config.MAX_BUILD_QUEUE_SIZE))
+    logger.debug("Max tests_cache size: {}".format(config.MAX_TESTS_CACHE_SIZE))
+    logger.debug("Configured suites:\n{}".format(json.dumps(config.SUITES.keys(), indent=2)))
+    logger.debug("Configured platforms:\n{}".format(json.dumps(config.PLATFORMS, indent=2)))
+
     # Connect to db
-    mongoengine.connect('test-informant')
+    logger.debug("Connecting to {} on '{}:{}".format(config.DB_NAME, config.DB_HOST, config.DB_PORT))
+    mongoengine.connect(config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT)
 
     # Start worker threads
+    logger.debug("Spawning {} worker threads".format(config.NUM_WORKERS))
     for _ in range(config.NUM_WORKERS):
         worker = Worker()
         worker.start()
@@ -77,8 +99,6 @@ def run(args=sys.argv[1:]):
         cp = ConfigParser()
         cp.read(args.config)
         pulse_args.update(dict(cp.items('pulse')))
-        if 'durable' in pulse_args:
-            pulse_args['durable'] = pulse_args['durable'].lower() in ('true', '1', 'yes', 'on')
 
     def cleanup(sig=None, frame=None):
         # delete the queue if durable set with a unique applabel
@@ -92,16 +112,20 @@ def run(args=sys.argv[1:]):
     signal.signal(signal.SIGTERM, cleanup)
 
     # Connect to pulse
+    sanitized_args = pulse_args.copy()
+    if 'password' in sanitized_args:
+        sanitized_args['password'] = '******'
+    logger.debug("Connecting to pulse with the following arguments:\n{}".format(json.dumps(sanitized_args, indent=2)))
     pulse = NormalizedBuildConsumer(callback=on_build_event, **pulse_args)
     try:
         while True:
-            print("Listening on '{}'...".format(topic))
+            logger.info("Listening on '{}'...".format(pulse_args['topic']))
             try:
                 pulse.listen()
             except IOError: # sometimes socket gets closed
                 pass
     except KeyboardInterrupt:
-        print("Waiting for threads to finish processing, press Ctrl-C again to exit now...")
+        logger.info("Waiting for threads to finish processing, press Ctrl-C again to exit now...")
         try:
             # do this instead of Queue.join() so KeyboardInterrupts get caught
             while build_queue.unfinished_tasks:
@@ -109,7 +133,7 @@ def run(args=sys.argv[1:]):
         except KeyboardInterrupt:
             sys.exit(1)
     finally:
-        print("Threads finished, cleaning up...")
+        logger.info("Threads finished, cleaning up...")
         cleanup()
 
 

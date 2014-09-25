@@ -6,12 +6,15 @@ from setuptools import setup, find_packages
 
 PACKAGE_VERSION = '0.1'
 
-deps = ['flask',
-        'Jinja2',
-        'manifestparser',
-        'mongoengine',
-        'mozfile',
-        'mozillapulse']
+deps = [
+    'flask',
+    'Jinja2',
+    'manifestparser',
+    'mongoengine',
+    'mozfile',
+    'mozillapulse',
+    'mozlog',
+]
 
 setup(name='test-informant',
       version=PACKAGE_VERSION,

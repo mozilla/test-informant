@@ -12,6 +12,7 @@ import threading
 import time
 import traceback
 
+from mozlog.structured import structuredlog
 import mozfile
 
 from . import config
@@ -20,6 +21,8 @@ from .models import Build, Suite
 # save tests bundles so we don't have to download a new one for each platform
 tests_cache = OrderedDict()
 build_queue = Queue(maxsize=config.MAX_BUILD_QUEUE_SIZE)
+
+logger = None
 
 
 class Worker(threading.Thread):
@@ -35,6 +38,9 @@ class Worker(threading.Thread):
         threading.Thread.__init__(self, target=self.do_work)
         self.daemon = True
 
+        global logger
+        logger = logger or structuredlog.get_default_logger()
+
     def do_work(self):
         while True:
             data = build_queue.get() # blocking
@@ -42,13 +48,13 @@ class Worker(threading.Thread):
                 self.process_build(data)
             except:
                 # keep on truckin' on
-                self.log("encountered an exception:\n{}.".format(traceback.format_exc()))
+                logger.error("encountered an exception:\n{}.".format(traceback.format_exc()))
             build_queue.task_done()
 
     def process_build(self, data):
         platform = '{}-{}'.format(data['platform'], data['buildtype'])
         build_str = "{}-{}".format(data['buildid'], platform)
-        self.log("now processing build '{}'".format(build_str))
+        logger.debug("now processing build '{}'".format(build_str))
 
         tests_path = self._prepare_tests(data['revision'], data['testsurl'])
         try:
@@ -71,6 +77,9 @@ class Worker(threading.Thread):
 
             for suite_name in config.PLATFORMS[platform]:
                 suite = config.SUITES[suite_name]
+
+                logger.debug("parsing manifests for '{}':\n{}".format(suite_name, json.dumps(suite['manifests'], indent=2)))
+                logger.debug("using the following build config:\n{}".format(json.dumps(mozinfo_json, indent=2)))
                 manifests = [os.path.join(tests_path, m) for m in suite['manifests']]
                 parse = suite['parser']()
 
@@ -81,6 +90,8 @@ class Worker(threading.Thread):
                 relpath = os.path.join(tests_path, suite['relpath'])
                 active = [os.path.relpath(t, relpath) for t in active]
                 skipped = [os.path.relpath(t, relpath) for t in skipped]
+
+                logger.debug("found {} active tests and {} skipped tests".format(len(active), len(skipped)))
 
                 # keep track of totals for the entire build across all test suites
                 build.total_active_tests += len(active)
@@ -100,10 +111,7 @@ class Worker(threading.Thread):
         finally:
             if config.MAX_TESTS_CACHE_SIZE <= 0:
                 mozfile.remove(tests_path)
-        self.log("finished processing build '{}'.".format(build_str))
-
-    def log(self, message):
-        print("{} - {}".format(self.name, message))
+        logger.debug("finished processing build '{}'".format(build_str))
 
     def _prepare_tests(self, revision, tests_url):
         use_cache = len(config.MAX_TESTS_CACHE_SIZE) > 0
@@ -114,12 +122,12 @@ class Worker(threading.Thread):
             start = datetime.datetime.now()
             while datetime.datetime.now() - start < datetime.timedelta(seconds=timeout):
                 if tests_cache[revision] != None:
-                    self.log("using pre-downloaded tests bundle for revision '{}'".format(revision))
+                    logger.debug("using pre-downloaded tests bundle for revision '{}'".format(revision))
                     # another thread has already downloaded the bundle for this revision, woohoo!
                     return tests_cache[revision]
                 time.sleep(1)
 
-        self.log("downloading tests bundle for revision '{}'".format(revision))
+        logger.debug("downloading tests bundle for revision '{}'".format(revision))
 
         if use_cache:
             # let other threads know we are already downloading this rev
