@@ -114,7 +114,7 @@ class Worker(threading.Thread):
         logger.debug("finished processing build '{}'".format(build_str))
 
     def _prepare_tests(self, revision, tests_url):
-        use_cache = len(config.MAX_TESTS_CACHE_SIZE) > 0
+        use_cache = config.MAX_TESTS_CACHE_SIZE > 0
         if use_cache and revision in tests_cache:
             # the tests bundle is possibly being downloaded by another thread,
             # wait a bit before downloading ourselves.
