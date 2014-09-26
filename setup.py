@@ -40,4 +40,5 @@ setup(name='test-informant',
       entry_points="""
         [console_scripts]
         test-informant = informant.pulse_listener:run
+        generate-informant-report = tools.generate_report:cli
       """)
