@@ -45,8 +45,6 @@ class ReportGenerator(object):
         since_epoch = (d - epoch).total_seconds()
         ts_range = (since_epoch, since_epoch + 86400) # 86400 seconds in a day
 
-        print(ts_range)
-
         # find all builds within the timestamp range
         order_by = '+timestamp' if first else '-timestamp'
         builds = Build.objects(
