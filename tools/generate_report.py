@@ -65,10 +65,15 @@ class ReportGenerator(object):
 
         # Counter returns ties in arbitrary order, find the revision that appears
         # first in the build list.
+        revision = None
         for build in builds:
             if build.revision[:12] in common:
                 revision = build.revision[:12]
                 break
+
+        if not revision:
+            print("No builds found for {}!".format(date))
+            sys.exit(1)
 
         # return all builds with that revision, regardless of whether or not they
         # are within the timestamp range.
