@@ -29,14 +29,12 @@ class ReportGenerator(object):
         host, port = db_server.split(':')
         mongoengine.connect(db_name, host=host, port=int(port))
 
-    def get_builds(self, date, first=True):
+    def get_builds(self, date):
         """
         Takes a date and returns a list of Build objects from that
         date and that all have the same revision.
 
         :param date: Date of the form YYYY-MM-DD.
-        :param first: If true, returns the earliest builds from date.
-                      Otherwise, returns the latest builds from date.
         :returns: A list of Build objects from the same revision.
         """
         # calculate timestamp range of date
@@ -46,11 +44,10 @@ class ReportGenerator(object):
         ts_range = (since_epoch, since_epoch + 86400) # 86400 seconds in a day
 
         # find all builds within the timestamp range
-        order_by = '+timestamp' if first else '-timestamp'
         builds = Build.objects(
             timestamp__gte=ts_range[0],
             timestamp__lt=ts_range[1],
-        ).order_by(order_by)
+        ).order_by('-timestamp')
 
         # pulse seems to use the short form revision for some builds, and the
         # long form for others. Solve this by always using the short form.
@@ -79,17 +76,15 @@ class ReportGenerator(object):
         # are within the timestamp range.
         return Build.objects(revision__startswith=revision)
 
-    def query_date(self, date, first=True):
+    def query_date(self, date):
         """
         Queries the state of tests on a given date and returns a
         json dump of the results.
 
         :param date: Date to perform query on, of the form 'YYYY-MM-DD'.
-        :param first: If True, use the first good revision from each platform on that day.
-                      Otherwise, use the last good revision.
         :returns: A json dump of the data from date.
         """
-        builds = self.get_builds(date, first=first)
+        builds = self.get_builds(date)
 
         raw_data = defaultdict(recursivedict)
         # try to use the long form revision if possible
@@ -120,8 +115,8 @@ class ReportGenerator(object):
         :returns: A Report object with two attributes, 'from_data' and 'to_data'.
         """
         print("Comparing tests from {} to {}".format(from_date, to_date))
-        from_data = self.query_date(from_date, first=True)
-        to_data = self.query_date(to_date, first=False)
+        from_data = self.query_date(from_date)
+        to_data = self.query_date(to_date)
 
         report_data = {
             'from_data': from_data,
