@@ -128,7 +128,7 @@ def run(args=sys.argv[1:]):
             except: # keep on listening
                 logger.debug(traceback.format_exc())
     except KeyboardInterrupt:
-        logger.info("Waiting for threads to finish processing, press Ctrl-C again to exit now...")
+        logger.info("Waiting for threads to finish processing {} builds, press Ctrl-C again to exit now...".format(build_queue.unfinished_tasks))
         try:
             # do this instead of Queue.join() so KeyboardInterrupts get caught
             while build_queue.unfinished_tasks:
