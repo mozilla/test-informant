@@ -78,8 +78,12 @@ class Worker(threading.Thread):
             for suite_name in config.PLATFORMS[platform]:
                 suite = config.SUITES[suite_name]
 
+                buildconfig = mozinfo_json.copy()
+                if 'extra_config' in suite:
+                    buildconfig.update(suite['extra_config'])
+
                 logger.debug("parsing manifests for '{}':\n{}".format(suite_name, json.dumps(suite['manifests'], indent=2)))
-                logger.debug("using the following build config:\n{}".format(json.dumps(mozinfo_json, indent=2)))
+                logger.debug("using the following build config:\n{}".format(json.dumps(buildconfig, indent=2)))
                 manifests = [os.path.join(tests_path, m) for m in suite['manifests']]
                 parse = suite['parser']()
 
