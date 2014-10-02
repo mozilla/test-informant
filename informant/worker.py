@@ -141,7 +141,7 @@ class Worker(threading.Thread):
                 # clean up the oldest revision, it most likely isn't needed anymore
                 mozfile.remove(tests_cache.popitem(last=False)[1]) # FIFO
 
-        tf = mozfile.NamedTemporaryFile()
+        tf = mozfile.NamedTemporaryFile(suffix='.zip')
         with open(tf.name, 'wb') as f:
             f.write(mozfile.load(tests_url).read())
 
