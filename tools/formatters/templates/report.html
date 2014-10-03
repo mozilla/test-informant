@@ -44,7 +44,22 @@
 
         label > span:last-child {
             float: right;
+            min-width: 80px;
             padding-right: 20px;
+        }
+
+        label > span:last-child > span:last-child{
+            float:right;
+        }
+
+        span .up {
+            color: rgb(0, 92, 0);
+            font-size: 0.9em;
+        }
+
+        span .down {
+            color: #B70000;
+            font-size: 0.9em;
         }
 
         li .menu_label + input[type=checkbox] {
@@ -118,7 +133,14 @@
         <ol id='menutree'>
         {% for suite, platforms in suites|dictsort %}
             <li>
-            <label class="menu_label" for="{{ suite }}"><span>{{ suite }}</span><span>{{ (platforms.meta.active/platforms.meta.total*100)|round|int }}%</span></label>
+                <label class="menu_label" for="{{ suite }}"><span>{{ suite }}</span>
+                    <span>
+                        {% if platforms.meta.added != 0 or platforms.meta.removed != 0 %}
+                            <span class='up'>&uarr;{{ platforms.meta.added }}</span><span class='down'>&darr;{{ platforms.meta.removed }}</span>&nbsp;&nbsp;
+                        {% endif %}
+                        <span>{{ (platforms.meta.active/platforms.meta.total*100)|round|int }}%</span>
+                    </span>
+                </label>
                 <input type="checkbox" id="{{ suite }}" />
                 <ol>
                 {% for platform, data in platforms|dictsort %}
@@ -126,7 +148,14 @@
                     {% continue %}
                 {% endif %}
                     <li>
-                        <label class="menu_label" for="{{ suite }}-{{ platform }}"><span>{{ platform }}</span><span>{{ (data.active/data.total*100)|round|int }}%</span></label>
+                        <label class="menu_label" for="{{ suite }}-{{ platform }}"><span>{{ platform }}</span>
+                            <span>
+                                {% if data.added|length != 0 or data.removed|length != 0 %}
+                                    <span class='up'>&uarr;{{ data.added|length }}</span><span class='down'>&darr;{{ data.removed|length }}</span>&nbsp;&nbsp;
+                                {% endif %}
+                                <span>{{ (data.active/data.total*100)|round|int }}%</span>
+                            </span>
+                        </label>
                         <input type="checkbox" id="{{ suite }}-{{ platform }}" />
                         <ol>
                             <li>

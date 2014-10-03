@@ -19,7 +19,7 @@ class HTMLFormatter(BaseFormatter):
         self.env = Environment(extensions=['jinja2.ext.loopcontrols'],
                                loader=PackageLoader('tools.formatters', 'templates'))
 
-    def _format_by_suite(self, report):
+    def _format_by_suite(self, report, include=None, exclude=None):
         data = defaultdict(recursivedict)
 
         from_suites = report.from_data['suites']
@@ -28,12 +28,21 @@ class HTMLFormatter(BaseFormatter):
         total_tests = 0
         total_active = 0
         for suite, platforms in to_suites.iteritems():
+            if exclude and suite in exclude:
+                continue
+            if include and suite not in include:
+                continue
+
             total_suite_tests = 0
             total_suite_active = 0
+            total_suite_added = 0
+            total_suite_removed = 0
 
             for platform, tests in platforms.iteritems():
-                added = [t for t in tests['active'] if t not in from_suites[suite][platform]['active']]
-                removed = [t for t in from_suites[suite][platform]['active'] if t not in tests['active']]
+                added = removed = []
+                if suite in from_suites:
+                    added = [t for t in tests['active'] if t not in from_suites[suite][platform]['active']]
+                    removed = [t for t in from_suites[suite][platform]['active'] if t not in tests['active']]
 
                 data[suite][platform]['total'] =  len(tests['active']) + len(tests['skipped'])
                 data[suite][platform]['active'] = len(tests['active'])
@@ -43,9 +52,13 @@ class HTMLFormatter(BaseFormatter):
 
                 total_suite_tests += len(tests['active']) + len(tests['skipped'])
                 total_suite_active += len(tests['active'])
+                total_suite_added += len(added)
+                total_suite_removed += len(removed)
 
             data[suite]['meta']['total'] = total_suite_tests
             data[suite]['meta']['active'] = total_suite_active
+            data[suite]['meta']['added'] = total_suite_added
+            data[suite]['meta']['removed'] = total_suite_removed
             total_tests += total_suite_tests
             total_active += total_suite_active
 
@@ -65,8 +78,5 @@ class HTMLFormatter(BaseFormatter):
     def _format_by_platform(self, report):
         raise NotImplementedError
 
-    def format_report(self, report, order='suite'):
-        if order == 'suite':
-            return self._format_by_suite(report)
-        return self._format_by_platform(report)
-
+    def format_report(self, *args, **kwargs):
+        return self._format_by_suite(*args, **kwargs)

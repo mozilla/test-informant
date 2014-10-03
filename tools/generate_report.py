@@ -143,11 +143,16 @@ def cli(args=sys.argv[1:]):
                         dest='to_date',
                         default=None,
                         help='Date to compare to, in the form YYYY-MM-DD.')
-    parser.add_argument('--order-by',
-                        dest='order',
-                        choices=['platform', 'suite'],
-                        default='suite',
-                        help='Summarize report by suite or by platform.')
+    parser.add_argument('--exclude',
+                        dest='exclude',
+                        action='append',
+                        default=None,
+                        help='Name of suite to exclude from the report.')
+    parser.add_argument('--include',
+                        dest='include',
+                        action='append',
+                        default=None,
+                        help='Name of suite to include in the report.')
     parser.add_argument('-o', '--output-file',
                         dest='output_file',
                         default=None,
@@ -171,9 +176,11 @@ def cli(args=sys.argv[1:]):
     html = HTMLFormatter()
 
     if args.output_file:
-        html.save_report(report, args.output_file, order=args.order)
+        html.save_report(report, args.output_file,
+                         exclude=args.exclude,
+                         include=args.include)
     else:
-        html.print_report(report, order=args.order)
+        html.print_report(report, exclude_suites=args.exclude)
 
 
 if __name__ == '__main__':
