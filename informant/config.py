@@ -38,11 +38,19 @@ SUITES = {
         'manifests': ['mochitest/a11y/a11y.ini'],
         'parser': IniParser,
         'relpath': 'mochitest/a11y',
+        'extra_config': {
+            'e10s': False,
+            'contentSandbox': 'off',
+        },
     },
     'mochitest-browser-chrome': {
         'manifests': ['mochitest/browser/browser-chrome.ini'],
         'parser': IniParser,
         'relpath': 'mochitest/browser',
+        'extra_config': {
+            'e10s': False,
+            'contentSandbox': 'off',
+        },
     },
     'mochitest-browser-chrome-e10s': {
         'manifests': ['mochitest/browser/browser-chrome.ini'],
@@ -50,12 +58,17 @@ SUITES = {
         'relpath': 'mochitest/browser',
         'extra_config': {
             'e10s': True,
+            'contentSandbox': 'off',
         },
     },
     'mochitest-chrome': {
         'manifests': ['mochitest/chrome/chrome.ini'],
         'parser': IniParser,
         'relpath': 'mochitest/chrome',
+        'extra_config': {
+            'e10s': False,
+            'contentSandbox': 'off',
+        },
     },
     'mochitest-plain-e10s': {
         'manifests': ['mochitest/tests/mochitest.ini'],
@@ -63,12 +76,17 @@ SUITES = {
         'relpath': 'mochitest/tests',
         'extra_config': {
             'e10s': True,
+            'contentSandbox': 'off',
         },
     },
     'mochitest-plain': {
         'manifests': ['mochitest/tests/mochitest.ini'],
         'parser': IniParser,
         'relpath': 'mochitest/tests',
+        'extra_config': {
+            'e10s': False,
+            'contentSandbox': 'off',
+        },
     },
     'xpcshell': {
         'manifests': ['xpcshell/tests/xpcshell.ini'],
