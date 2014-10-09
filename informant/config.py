@@ -93,11 +93,6 @@ SUITES = {
         'parser': IniParser,
         'relpath': 'xpcshell/tests',
     },
-    'xpcshell-android': {
-        'manifests': ['xpcshell/tests/xpcshell_android.ini'],
-        'parser': IniParser,
-        'relpath': 'xpcshell/tests',
-    },
 }
 
 # a mapping from plaform type to enabled suites.
@@ -174,7 +169,7 @@ PLATFORMS = {
     ],
     'android-opt': [
         'mochitest-plain',
-        'xpcshell-android',
+        'xpcshell',
     ],
     'linux32_gecko-opt': [
         'mochitest-plain',
