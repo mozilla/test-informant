@@ -9,10 +9,9 @@ import sys
 
 import mongoengine
 
-from informant.config import PLATFORMS
 from informant.models import Build
 
-from .formatters import HTMLFormatter
+from .formatters import all_formatters, SummaryFormatter
 
 recursivedict = lambda: defaultdict(recursivedict)
 
@@ -153,10 +152,12 @@ def cli(args=sys.argv[1:]):
                         action='append',
                         default=None,
                         help='Name of suite to include in the report.')
-    parser.add_argument('-o', '--output-file',
-                        dest='output_file',
-                        default=None,
-                        help='Save the report to a file, defaults to stdout')
+
+    for fmt in all_formatters:
+        parser.add_argument('--gen-%s' % fmt,
+                            dest='gen_%s' % fmt,
+                            default=None,
+                            help='Generate a %s report.' % fmt)
     args = parser.parse_args(args)
 
     if args.to_date and not args.from_date:
@@ -173,14 +174,25 @@ def cli(args=sys.argv[1:]):
     generate = ReportGenerator(args.db_name, args.db_server)
     report = generate(args.from_date, args.to_date)
 
-    html = HTMLFormatter()
-
-    if args.output_file:
-        html.save_report(report, args.output_file,
-                         exclude=args.exclude,
-                         include=args.include)
-    else:
-        html.print_report(report, exclude_suites=args.exclude)
+    use_default = True
+    for fmt, cls in all_formatters.iteritems():
+        stream = getattr(args, 'gen_%s' % fmt, None)
+        if stream:
+            use_default = False
+            formatter = cls()
+            if stream == '-':
+                formatter.print_report(report,
+                                       exclude=args.exclude,
+                                       include=args.include)
+            else:
+                formatter.save_report(report, stream,
+                                      exclude=args.exclude,
+                                      include=args.include)
+    if use_default:
+        summary = SummaryFormatter()
+        summary.print_report(report,
+                             exclude=args.exclude,
+                             include=args.include)
 
 
 if __name__ == '__main__':

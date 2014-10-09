@@ -5,3 +5,10 @@
 from base import BaseFormatter
 from html import HTMLFormatter
 from raw import JSONFormatter
+from summary import SummaryFormatter
+
+all_formatters = {
+    'html': HTMLFormatter,
+    'raw': JSONFormatter,
+    'summary': SummaryFormatter,
+}
