@@ -14,6 +14,7 @@ deps = [
     'mozfile',
     'mozillapulse',
     'mozlog',
+    'requests',
 ]
 
 setup(name='test-informant',

@@ -6,7 +6,6 @@
 from __future__ import print_function, unicode_literals
 
 from argparse import ArgumentParser
-from ConfigParser import ConfigParser
 from Queue import Full
 import json
 import os
@@ -55,12 +54,9 @@ def on_build_event(data, message):
 
 
 def run(args=sys.argv[1:]):
-    parser = ArgumentParser()
-    parser.add_argument('--cfg',
-                        dest='config',
-                        default=os.path.expanduser('~/.pulserc'),
-                        help='Path to pulse configuration file.')
+    config.read_runtime_config()
 
+    parser = ArgumentParser()
     commandline.log_formatters = { k: v for k, v in commandline.log_formatters.iteritems() if k in ('raw', 'mach') }
     commandline.add_logging_group(parser)
     args = parser.parse_args(args)
@@ -69,24 +65,24 @@ def run(args=sys.argv[1:]):
     logger = commandline.setup_logging("test-informant", args)
 
     # Print configuration info
+    settings = config.settings
     logger.info("Running test-informant")
-    logger.debug("Max build_queue size: {}".format(config.MAX_BUILD_QUEUE_SIZE))
-    logger.debug("Max tests_cache size: {}".format(config.MAX_TESTS_CACHE_SIZE))
-    logger.debug("Configured suites:\n{}".format(json.dumps(config.SUITES.keys(), indent=2)))
+    logger.debug("Max build_queue size: {}".format(settings['MAX_BUILD_QUEUE_SIZE']))
+    logger.debug("Max tests_cache size: {}".format(settings['MAX_TESTS_CACHE_SIZE']))
     logger.debug("Configured platforms:\n{}".format(json.dumps(config.PLATFORMS, indent=2)))
 
     # Connect to db
-    logger.debug("Connecting to {} on '{}:{}".format(config.DB_NAME, config.DB_HOST, config.DB_PORT))
-    mongoengine.connect(config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT)
+    logger.debug("Connecting to {} on '{}:{}".format(settings['DB_NAME'], settings['DB_HOST'], settings['DB_PORT']))
+    mongoengine.connect(settings['DB_NAME'], host=settings['DB_HOST'], port=settings['DB_PORT'])
 
     # Start worker threads
-    logger.debug("Spawning {} worker threads".format(config.NUM_WORKERS))
-    for _ in range(config.NUM_WORKERS):
+    logger.debug("Spawning {} worker threads".format(settings['NUM_WORKERS']))
+    for _ in range(settings['NUM_WORKERS']):
         worker = Worker()
         worker.start()
 
     label = 'test-informant-{}'.format(uuid.uuid4())
-    topic = 'build.{}.#'.format(config.BRANCH)
+    topic = 'build.{}.#'.format(settings['BRANCH'])
 
     # defaults
     pulse_args = {
@@ -94,11 +90,7 @@ def run(args=sys.argv[1:]):
         'topic': topic,
         'durable': False,
     }
-    # override defaults with a ~/.pulserc
-    if os.path.isfile(args.config):
-        cp = ConfigParser()
-        cp.read(args.config)
-        pulse_args.update(dict(cp.items('pulse')))
+    pulse_args.update(config.pulse)
 
     def cleanup(sig=None, frame=None):
         # delete the queue if durable set with a unique applabel
