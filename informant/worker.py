@@ -14,13 +14,16 @@ import traceback
 
 from mozlog.structured import structuredlog
 import mozfile
+import requests
 
 from . import config
 from .models import Build, Suite
 
+settings = config.settings
+
 # save tests bundles so we don't have to download a new one for each platform
 tests_cache = OrderedDict()
-build_queue = Queue(maxsize=config.MAX_BUILD_QUEUE_SIZE)
+build_queue = Queue(maxsize=settings['MAX_BUILD_QUEUE_SIZE'])
 
 logger = None
 
@@ -113,12 +116,23 @@ class Worker(threading.Thread):
             # commit to db
             build.save()
         finally:
-            if config.MAX_TESTS_CACHE_SIZE <= 0:
+            if settings['MAX_TESTS_CACHE_SIZE'] <= 0:
                 mozfile.remove(tests_path)
         logger.debug("finished processing build '{}'".format(build_str))
 
+    def _download(self, url):
+        r = requests.get(url)
+        if r.status_code == 403:
+            if hasattr(config, 'auth'):
+                auth = (config.auth['username'], config.auth['password'])
+                r = requests.get(url, auth=auth)
+            else:
+                logger.error("The url '{}' requires authentication!".format(url))
+        r.raise_for_status()
+        return r.content
+
     def _prepare_tests(self, revision, tests_url):
-        use_cache = config.MAX_TESTS_CACHE_SIZE > 0
+        use_cache = settings['MAX_TESTS_CACHE_SIZE'] > 0
         if use_cache and revision in tests_cache:
             # the tests bundle is possibly being downloaded by another thread,
             # wait a bit before downloading ourselves.
@@ -137,13 +151,14 @@ class Worker(threading.Thread):
             # let other threads know we are already downloading this rev
             tests_cache[revision] = None
 
-            if len(tests_cache) >= config.MAX_TESTS_CACHE_SIZE:
+            if len(tests_cache) >= settings['MAX_TESTS_CACHE_SIZE']:
                 # clean up the oldest revision, it most likely isn't needed anymore
                 mozfile.remove(tests_cache.popitem(last=False)[1]) # FIFO
 
+
         tf = mozfile.NamedTemporaryFile(suffix='.zip')
         with open(tf.name, 'wb') as f:
-            f.write(mozfile.load(tests_url).read())
+            f.write(self._download(tests_urlt))
 
         tests_path = tempfile.mkdtemp()
         mozfile.extract(tf.name, tests_path)
@@ -155,5 +170,5 @@ class Worker(threading.Thread):
     def _prepare_mozinfo(self, mozinfo_url):
         tf = tempfile.mkstemp()[1]
         with open(tf, 'wb') as f:
-            f.write(mozfile.load(mozinfo_url).read())
+            f.write(self._download(mozinfo_url))
         return tf

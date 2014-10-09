@@ -2,30 +2,34 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from ConfigParser import ConfigParser
 from multiprocessing import cpu_count
+import os
 
 from .parsers import IniParser
 
-# mongodb database name to connect to
-DB_NAME = 'test-informant'
 
-# mongodb host to connect to
-DB_HOST = 'localhost'
+globals()['pulse'] = {}
+globals()['settings'] = {
+    'DB_NAME': 'test-informant',
+    'DB_HOST': 'localhost',
+    'DB_PORT': 27017,
+    'BRANCH': 'mozilla-central',
+    'NUM_WORKERS': cpu_count(),
+    'MAX_BUILD_QUEUE_SIZE': 100,
+    'MAX_TESTS_CACHE_SIZE': 0,
+}
 
-# mongodb port to connect to
-DB_PORT = 27017
-
-# branch to listen for builds on
-BRANCH = 'mozilla-inbound'
-
-# number of threads to spawn
-NUM_WORKERS = cpu_count()
-
-# the number of builds allowed to queue up before they start getting dropped
-MAX_BUILD_QUEUE_SIZE = 100
-
-# the number of tests.zip bundles allowed on the filesystem at once, disabled by default
-MAX_TESTS_CACHE_SIZE = 0
+def read_runtime_config():
+    config_path = os.path.expanduser('~/.testinrc')
+    if os.path.isfile(config_path):
+        cp = ConfigParser()
+        cp.read(config_path)
+        for section in cp.sections():
+            if section in globals():
+                globals()[section].update(dict(cp.items(section)))
+            else:
+                globals()[section] = dict(cp.items(section))
 
 # a mapping from suite name to dict containing manifest path and parser type
 SUITES = {
