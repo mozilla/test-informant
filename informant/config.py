@@ -26,10 +26,22 @@ def read_runtime_config():
         cp = ConfigParser()
         cp.read(config_path)
         for section in cp.sections():
-            if section in globals():
-                globals()[section].update(dict(cp.items(section)))
+            print section
+            if section == 'settings':
+                items = dict([(k.upper(), v) for k, v in cp.items(section)])
             else:
-                globals()[section] = dict(cp.items(section))
+                items = dict(cp.items(section))
+
+            if section in globals():
+                globals()[section].update(items)
+            else:
+                globals()[section] = items
+
+            for k, v in globals()[section].iteritems():
+                try:
+                    globals()[section][k] = int(v)
+                except:
+                    pass
 
 # a mapping from suite name to dict containing manifest path and parser type
 SUITES = {

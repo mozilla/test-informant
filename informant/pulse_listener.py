@@ -72,7 +72,7 @@ def run(args=sys.argv[1:]):
     logger.debug("Configured platforms:\n{}".format(json.dumps(config.PLATFORMS, indent=2)))
 
     # Connect to db
-    logger.debug("Connecting to {} on '{}:{}".format(settings['DB_NAME'], settings['DB_HOST'], settings['DB_PORT']))
+    logger.debug("Connecting to {} on '{}:{}'".format(settings['DB_NAME'], settings['DB_HOST'], settings['DB_PORT']))
     mongoengine.connect(settings['DB_NAME'], host=settings['DB_HOST'], port=settings['DB_PORT'])
 
     # Start worker threads
