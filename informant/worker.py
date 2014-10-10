@@ -158,7 +158,7 @@ class Worker(threading.Thread):
 
         tf = mozfile.NamedTemporaryFile(suffix='.zip')
         with open(tf.name, 'wb') as f:
-            f.write(self._download(tests_urlt))
+            f.write(self._download(tests_url))
 
         tests_path = tempfile.mkdtemp()
         mozfile.extract(tf.name, tests_path)
