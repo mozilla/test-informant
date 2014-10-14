@@ -187,6 +187,9 @@ PLATFORMS = {
         'mochitest-plain',
         'xpcshell',
     ],
+    'android-debug': [
+        'mochitest-plain',
+    ],
     'linux32_gecko-opt': [
         'mochitest-plain',
     ],
