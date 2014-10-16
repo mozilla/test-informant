@@ -34,14 +34,15 @@ def on_build_event(data, message):
     message.ack()
     payload = data['payload']
     platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
-    logger.debug("Recieved build from pulse:\n{}".format(json.dumps(payload, indent=2)))
 
     if any(('l10n' in payload['tags'],          # skip l10n builds
             'nightly' in payload['tags'],       # skip nightly builds
             not payload['testsurl'],            # skip builds that don't have any tests
             platform not in config.PLATFORMS)): # skip builds without any supported suites
+        logger.debug("Skipping '{}' build".format(platform))
         return
 
+    logger.debug("Recieved build from pulse:\n{}".format(json.dumps(payload, indent=2)))
     logger.info("Processing a '{}' build from revision {}".format(platform, payload['revision']))
     try:
         build_queue.put(payload, block=False)
