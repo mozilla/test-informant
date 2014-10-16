@@ -117,6 +117,8 @@ def run(args=sys.argv[1:]):
                 pulse.listen()
             except KeyboardInterrupt:
                 raise
+            except IOError:
+                pass # these are common and not worth logging
             except: # keep on listening
                 logger.debug(traceback.format_exc())
     except KeyboardInterrupt:
