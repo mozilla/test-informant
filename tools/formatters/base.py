@@ -44,7 +44,7 @@ class BaseFormatter(object):
 
             for platform, tests in platforms.iteritems():
                 added = removed = []
-                if suite in from_suites:
+                if suite in from_suites and platform in from_suites[suite]:
                     added = [t for t in tests['active'] if t not in from_suites[suite][platform]['active']]
                     removed = [t for t in from_suites[suite][platform]['active'] if t not in tests['active']]
 
