@@ -196,6 +196,15 @@ PLATFORMS = {
     'linux64_gecko-opt': [
         'mochitest-plain',
     ] ,
+    'emulator-opt': [
+        'marionette',
+        'mochitest-plain',
+        'xpcshell',
+    ],
+    'emulator-debug': [
+        'mochitest-plain',
+        'xpchshell',
+    ],
     'mulet-opt': [
         'mochitest-plain',
     ],
