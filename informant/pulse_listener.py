@@ -107,7 +107,7 @@ def run(args=sys.argv[1:]):
     # Connect to pulse
     sanitized_args = pulse_args.copy()
     if 'password' in sanitized_args:
-        sanitized_args['password'] = '******'
+        sanitized_args['password'] = 'hunter1'
     logger.debug("Connecting to pulse with the following arguments:\n{}".format(json.dumps(sanitized_args, indent=2)))
     pulse = NormalizedBuildConsumer(callback=on_build_event, **pulse_args)
     try:
