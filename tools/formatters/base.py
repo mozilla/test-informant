@@ -16,7 +16,10 @@ class BaseFormatter(object):
 
     def save_report(self, report, file_name, **kwargs):
         with open(file_name, 'w') as f:
-            f.write(self.format_report(report, **kwargs))
+            contents = self.format_report(report, **kwargs)
+            if isinstance(contents, unicode):
+                contents = contents.encode('utf-8')
+            f.write(contents)
 
     def print_report(self, *args, **kwargs):
         print(self.format_report(*args, **kwargs))
