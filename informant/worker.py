@@ -122,7 +122,7 @@ class Worker(threading.Thread):
 
     def _download(self, url):
         r = requests.get(url)
-        if r.status_code == 403:
+        if r.status_code == 401:
             if hasattr(config, 'auth'):
                 auth = (config.auth['username'], config.auth['password'])
                 r = requests.get(url, auth=auth)
