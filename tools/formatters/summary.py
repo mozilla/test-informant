@@ -46,7 +46,8 @@ Showing tests enabled or disabled between {from_date} and {to_date}.
             'from_revision': report.from_data['revision'][:12],
             'total_percentage': int(round(data['total_active']/data['total_tests']*100)),
         }
-        content.insert(0, "Summary:")
         content.insert(0, self.content_header.format(**header_context))
+        content.insert(1, "Summary")
+        content.insert(2, "-------")
 
         return '\n'.join(content)

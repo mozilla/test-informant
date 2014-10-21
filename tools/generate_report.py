@@ -113,7 +113,6 @@ class ReportGenerator(object):
         :param to_date: Date at the end of the range, of the form YYYY-MM-DD.
         :returns: A Report object with two attributes, 'from_data' and 'to_data'.
         """
-        print("Comparing tests from {} to {}".format(from_date, to_date))
         from_data = self.query_date(from_date)
         to_data = self.query_date(to_date)
 
