@@ -35,11 +35,18 @@ def on_build_event(data, message):
     payload = data['payload']
     platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
 
-    if any(('l10n' in payload['tags'],          # skip l10n builds
-            'nightly' in payload['tags'],       # skip nightly builds
-            not payload['testsurl'],            # skip builds that don't have any tests
-            platform not in config.PLATFORMS)): # skip builds without any supported suites
-        logger.debug("Skipping '{}' build".format(platform))
+    skip = None
+    if 'l10n' in payload['tags']:
+        skip = "'l10n' in tags"
+    elif 'nightly' in payload['tags']:
+        skip = "'nightly' in tags"
+    elif not payload['testsurl']:
+        skip = "there is no tests url"
+    elif platform not in config.PLATFORMS:
+        skip = "platform not configured"
+
+    if skip:
+        logger.debug("Skipping '{}' build, because {}".format(platform, skip))
         return
 
     logger.debug("Recieved build from pulse:\n{}".format(json.dumps(payload, indent=2)))
