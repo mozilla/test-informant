@@ -168,7 +168,8 @@ class Worker(threading.Thread):
         return tests_path
 
     def _prepare_mozinfo(self, mozinfo_url):
-        tf = tempfile.mkstemp()[1]
+        fh, tf = tempfile.mkstemp()
+        fh.close()
         with open(tf, 'wb') as f:
             f.write(self._download(mozinfo_url))
         return tf
