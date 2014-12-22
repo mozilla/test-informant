@@ -156,12 +156,15 @@ class Worker(threading.Thread):
                 mozfile.remove(tests_cache.popitem(last=False)[1]) # FIFO
 
 
-        tf = mozfile.NamedTemporaryFile(suffix='.zip')
-        with open(tf.name, 'wb') as f:
-            f.write(self._download(tests_url))
+        tf, tp = tempfile.mkstemp(suffix='.zip', prefix='ti')
+        tf.close()
+
+        with open(tp, 'wb') as tf:
+            tf.write(self._download(tests_url))
 
         tests_path = tempfile.mkdtemp()
-        mozfile.extract(tf.name, tests_path)
+        mozfile.extract(tp, tests_path)
+        mozfile.remove(tp)
 
         if use_cache:
             tests_cache[revision] = tests_path
