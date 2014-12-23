@@ -155,15 +155,11 @@ class Worker(threading.Thread):
                 # clean up the oldest revision, it most likely isn't needed anymore
                 mozfile.remove(tests_cache.popitem(last=False)[1]) # FIFO
 
-
-        tf, tp = tempfile.mkstemp(suffix='.zip', prefix='ti')
-        tf.close()
-
-        with open(tp, 'wb') as tf:
+        th, tp = tempfile.mkstemp(suffix='.zip', prefix='ti')
+        with os.fdopen(th, 'wb') as tf:
             tf.write(self._download(tests_url))
-
-        tests_path = tempfile.mkdtemp()
-        mozfile.extract(tp, tests_path)
+            tests_path = tempfile.mkdtemp()
+            mozfile.extract(tp, tests_path)
         mozfile.remove(tp)
 
         if use_cache:
@@ -171,8 +167,7 @@ class Worker(threading.Thread):
         return tests_path
 
     def _prepare_mozinfo(self, mozinfo_url):
-        fh, tf = tempfile.mkstemp()
-        fh.close()
-        with open(tf, 'wb') as f:
-            f.write(self._download(mozinfo_url))
-        return tf
+        with mozfile.NamedTemporaryFile(mode='wb', prefix='ti', delete=False) as tf:
+            tf.write(self._download(mozinfo_url))
+            path = tf.name
+        return path
