@@ -156,20 +156,20 @@ class Worker(threading.Thread):
                 mozfile.remove(tests_cache.popitem(last=False)[1]) # FIFO
 
 
-        tf = mozfile.NamedTemporaryFile(suffix='.zip')
+        tf = mozfile.NamedTemporaryFile(suffix='.zip', prefix='ti')
+        # for some reason mozfile doesn't recognize the zipfile unless it is saved this way
         with open(tf.name, 'wb') as f:
             f.write(self._download(tests_url))
 
         tests_path = tempfile.mkdtemp()
         mozfile.extract(tf.name, tests_path)
+        tf.close()
 
         if use_cache:
             tests_cache[revision] = tests_path
         return tests_path
 
     def _prepare_mozinfo(self, mozinfo_url):
-        fh, tf = tempfile.mkstemp()
-        fh.close()
-        with open(tf, 'wb') as f:
+        with mozfile.NamedTemporaryFile(prefix='ti', delete=False) as f:
             f.write(self._download(mozinfo_url))
-        return tf
+            return f.name
