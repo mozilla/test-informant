@@ -183,12 +183,19 @@ PLATFORMS = {
         'mochitest-plain',
         'xpcshell',
     ],
-    'android-opt': [
+    'android-api-9-opt': [
         'mochitest-plain',
         'xpcshell',
     ],
-    'android-debug': [
+    'android-api-11-opt': [
         'mochitest-plain',
+        'xpcshell',
+    ],
+    'android-api-11-debug': [
+        'mochitest-plain',
+    ],
+    'android-x86-opt': [
+        'xpcshell',
     ],
     'linux32_gecko-opt': [
         'mochitest-plain',
