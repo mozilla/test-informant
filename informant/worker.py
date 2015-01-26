@@ -27,6 +27,7 @@ build_queue = Queue(maxsize=settings['MAX_BUILD_QUEUE_SIZE'])
 
 logger = None
 
+INSTALLER_SUFFIXES = ('.tar.bz2', '.zip', '.dmg', '.exe', '.apk', '.tar.gz')
 
 class Worker(threading.Thread):
     """
@@ -59,17 +60,22 @@ class Worker(threading.Thread):
         build_str = "{}-{}".format(data['buildid'], platform)
         logger.debug("now processing build '{}'".format(build_str))
 
-        tests_path = self._prepare_tests(data['revision'], data['testsurl'])
+        # compute base url based off buildurl removing file extension(s)
+        base_url = data['buildurl']
+        for suffix in INSTALLER_SUFFIXES:
+            if base_url.endswith(suffix):
+                base_url = base_url[:-len(suffix)]
+        tests_url = '{}.tests.zip'.format(base_url)
+        tests_path = self._prepare_tests(data['revision'], tests_url)
         try:
-            # compute mozinfo.json url based off the tests.zip url
-            mozinfo_url = '{}.mozinfo.json'.format(data['testsurl'][:-len('.tests.zip')])
+            mozinfo_url = '{}.mozinfo.json'.format(base_url)
             mozinfo_path = self._prepare_mozinfo(mozinfo_url)
             with open(mozinfo_path, 'r') as f:
                 mozinfo_json = json.loads(f.read())
             mozfile.remove(mozinfo_path)
 
             # create an entry for this build in the db
-            build = Build(
+            build, is_new = Build.objects.get_or_create(
                 buildid=data['buildid'],
                 buildtype=data['buildtype'],
                 platform=data['platform'],
@@ -78,7 +84,8 @@ class Worker(threading.Thread):
                 revision=data['revision'],
             )
 
-            for suite_name in config.PLATFORMS[platform]:
+            suite_name = data['test']
+            if suite_name in config.PLATFORMS[platform]:
                 suite = config.SUITES[suite_name]
 
                 buildconfig = mozinfo_json.copy()

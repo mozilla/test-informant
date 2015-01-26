@@ -36,12 +36,8 @@ def on_build_event(data, message):
     platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
 
     skip = None
-    if 'l10n' in payload['tags']:
-        skip = "'l10n' in tags"
-    elif 'nightly' in payload['tags']:
-        skip = "'nightly' in tags"
-    elif not payload['testsurl']:
-        skip = "there is no tests url"
+    if not payload['buildurl']:
+        skip = "there is no build url"
     elif platform not in config.PLATFORMS:
         skip = "platform not configured"
 
@@ -90,7 +86,7 @@ def run(args=sys.argv[1:]):
         worker.start()
 
     label = 'test-informant-{}'.format(uuid.uuid4())
-    topic = 'build.{}.#'.format(settings['BRANCH'])
+    topic = 'unittest.{}.#'.format(settings['BRANCH'])
 
     # defaults
     pulse_args = {
