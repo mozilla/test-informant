@@ -7,6 +7,7 @@ from Queue import Queue
 import datetime
 import json
 import os
+import re
 import tempfile
 import threading
 import time
@@ -28,6 +29,14 @@ build_queue = Queue(maxsize=settings['MAX_BUILD_QUEUE_SIZE'])
 logger = None
 
 INSTALLER_SUFFIXES = ('.tar.bz2', '.zip', '.dmg', '.exe', '.apk', '.tar.gz')
+
+def get_suite_name(suite_chunk, platform):
+    for suite in config.PLATFORMS[platform]:
+        for name in config.SUITES[suite]['names']:
+            possible = re.compile(name + '(-[0-9]+)?$')
+            if possible.match(suite_chunk):
+                return suite
+    return None
 
 class Worker(threading.Thread):
     """
@@ -84,8 +93,8 @@ class Worker(threading.Thread):
                 revision=data['revision'],
             )
 
-            suite_name = data['test']
-            if suite_name in config.PLATFORMS[platform]:
+            suite_name = get_suite_name(data['test'], platform)
+            if suite_name:
                 suite = config.SUITES[suite_name]
 
                 buildconfig = mozinfo_json.copy()
