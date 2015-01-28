@@ -4,16 +4,12 @@
 
 from collections import OrderedDict
 from Queue import Queue
-import datetime
 import json
-import os
 import re
-import tempfile
 import threading
-import time
 import traceback
 
-from mozlog.structured import structuredlog
+from mozlog.structured import reader, structuredlog
 import mozfile
 import requests
 
@@ -30,13 +26,7 @@ logger = None
 
 INSTALLER_SUFFIXES = ('.tar.bz2', '.zip', '.dmg', '.exe', '.apk', '.tar.gz')
 
-def get_suite_name(suite_chunk, platform):
-    for suite in config.PLATFORMS[platform]:
-        for name in config.SUITES[suite]['names']:
-            possible = re.compile(name + '(-[0-9]+)?$')
-            if possible.match(suite_chunk):
-                return suite
-    return None
+lock = threading.Lock()
 
 class Worker(threading.Thread):
     """
@@ -58,63 +48,64 @@ class Worker(threading.Thread):
         while True:
             data = build_queue.get() # blocking
             try:
-                self.process_build(data)
+                self.process_suite(data)
             except:
                 # keep on truckin' on
                 logger.error("encountered an exception:\n{}.".format(traceback.format_exc()))
             build_queue.task_done()
 
-    def process_build(self, data):
+    def process_suite(self, data):
         platform = '{}-{}'.format(data['platform'], data['buildtype'])
         build_str = "{}-{}".format(data['buildid'], platform)
         logger.debug("now processing build '{}'".format(build_str))
 
-        # compute base url based off buildurl removing file extension(s)
-        base_url = data['buildurl']
-        for suffix in INSTALLER_SUFFIXES:
-            if base_url.endswith(suffix):
-                base_url = base_url[:-len(suffix)]
-        tests_url = '{}.tests.zip'.format(base_url)
-        tests_path = self._prepare_tests(data['revision'], tests_url)
-        try:
-            mozinfo_url = '{}.mozinfo.json'.format(base_url)
-            mozinfo_path = self._prepare_mozinfo(mozinfo_url)
-            with open(mozinfo_path, 'r') as f:
-                mozinfo_json = json.loads(f.read())
-            mozfile.remove(mozinfo_path)
+        active = []
+        skipped = []
 
-            # create an entry for this build in the db
-            build, is_new = Build.objects.get_or_create(
-                buildid=data['buildid'],
-                buildtype=data['buildtype'],
-                platform=data['platform'],
-                config=mozinfo_json,
-                timestamp=data['builddate'],
-                revision=data['revision'],
-            )
+        def append_active_or_skipped(log_item):
+            if log_item['status'] == 'SKIP':
+                skipped.append(log_item['test'])
+            else:
+                active.append(log_item['test'])
 
-            suite_name = get_suite_name(data['test'], platform)
+        for filename, url in data['blobber_files'].iteritems():
+            if filename.endswith('_raw.log'):
+                log_path = self._prepare_mozlog(url)
+                with open(log_path, 'r') as log:
+                    iterator = reader.read(log)
+                    action_map = {"test_end": append_active_or_skipped}
+                    reader.each_log(iterator, action_map)
+                mozfile.remove(log_path)
+        logger.debug("found {} active tests and {} skipped tests".format(len(active), len(skipped)))
+
+        with lock:
+            suite_name = self.get_suite_name(data['test'], platform)
             if suite_name:
-                suite = config.SUITES[suite_name]
+                # create an entry for this build in the db
+                build, is_new = Build.objects.get_or_create(
+                    buildid=data['buildid'],
+                    buildtype=data['buildtype'],
+                    platform=data['platform'],
+                    timestamp=data['builddate'],
+                    revision=data['revision'],
+                )
 
-                buildconfig = mozinfo_json.copy()
-                if 'extra_config' in suite:
-                    buildconfig.update(suite['extra_config'])
+                # look for other chunks of the same test suite
+                for suite in build.suites:
+                    if suite.name == suite_name:
+                        active = set(active) | set(suite.active_tests)
+                        skipped = set(skipped) | set(suite.skipped_tests)
+                        build.suites.remove(suite)
 
-                logger.debug("parsing manifests for '{}':\n{}".format(suite_name, json.dumps(suite['manifests'], indent=2)))
-                logger.debug("using the following build config:\n{}".format(json.dumps(buildconfig, indent=2)))
-                manifests = [os.path.join(tests_path, m) for m in suite['manifests']]
-                parse = suite['parser']()
+                        # we are counting these tests twice
+                        build.total_active_tests -= len(suite.active_tests)
+                        build.total_skipped_tests -= len(suite.skipped_tests)
 
-                # perform the actual manifest parsing
-                active, skipped = parse(manifests, buildconfig)
-
-                # compute test paths relative to topsrcdir
-                relpath = os.path.join(tests_path, suite['relpath'])
-                active = [os.path.relpath(t, relpath) for t in active]
-                skipped = [os.path.relpath(t, relpath) for t in skipped]
-
-                logger.debug("found {} active tests and {} skipped tests".format(len(active), len(skipped)))
+                        # we are counting this build twice
+                        suite.refcount -= 1
+                        if suite.refcount == 0:
+                            suite.delete()
+                        break
 
                 # keep track of totals for the entire build across all test suites
                 build.total_active_tests += len(active)
@@ -123,18 +114,14 @@ class Worker(threading.Thread):
                 # don't store multiple copies of the same result
                 s, created = Suite.objects.get_or_create(
                     name=suite_name,
-                    active_tests=active,
-                    skipped_tests=skipped,
+                    active_tests=sorted(active),
+                    skipped_tests=sorted(skipped),
                 )
                 s.refcount += 1
                 s.save()
                 build.suites.append(s)
-            # commit to db
-            build.save()
-        finally:
-            if settings['MAX_TESTS_CACHE_SIZE'] <= 0:
-                mozfile.remove(tests_path)
-        logger.debug("finished processing build '{}'".format(build_str))
+                # commit to db
+                build.save()
 
     def _download(self, url):
         r = requests.get(url)
@@ -147,45 +134,15 @@ class Worker(threading.Thread):
         r.raise_for_status()
         return r.content
 
-    def _prepare_tests(self, revision, tests_url):
-        use_cache = settings['MAX_TESTS_CACHE_SIZE'] > 0
-        if use_cache and revision in tests_cache:
-            # the tests bundle is possibly being downloaded by another thread,
-            # wait a bit before downloading ourselves.
-            timeout = 300 # 5 minutes
-            start = datetime.datetime.now()
-            while datetime.datetime.now() - start < datetime.timedelta(seconds=timeout):
-                if tests_cache[revision] != None:
-                    logger.debug("using pre-downloaded tests bundle for revision '{}'".format(revision))
-                    # another thread has already downloaded the bundle for this revision, woohoo!
-                    return tests_cache[revision]
-                time.sleep(1)
-
-        logger.debug("downloading tests bundle for revision '{}'".format(revision))
-
-        if use_cache:
-            # let other threads know we are already downloading this rev
-            tests_cache[revision] = None
-
-            if len(tests_cache) >= settings['MAX_TESTS_CACHE_SIZE']:
-                # clean up the oldest revision, it most likely isn't needed anymore
-                mozfile.remove(tests_cache.popitem(last=False)[1]) # FIFO
-
-
-        tf = mozfile.NamedTemporaryFile(suffix='.zip', prefix='ti')
-        # for some reason mozfile doesn't recognize the zipfile unless it is saved this way
-        with open(tf.name, 'wb') as f:
-            f.write(self._download(tests_url))
-
-        tests_path = tempfile.mkdtemp()
-        mozfile.extract(tf.name, tests_path)
-        tf.close()
-
-        if use_cache:
-            tests_cache[revision] = tests_path
-        return tests_path
-
-    def _prepare_mozinfo(self, mozinfo_url):
+    def _prepare_mozlog(self, url):
         with mozfile.NamedTemporaryFile(prefix='ti', delete=False) as f:
-            f.write(self._download(mozinfo_url))
+            f.write(self._download(url))
             return f.name
+
+    def get_suite_name(self, suite_chunk, platform):
+        for suite in config.PLATFORMS[platform]:
+            for name in config.SUITES[suite]['names']:
+                possible = re.compile(name + '(-[0-9]+)?$')
+                if possible.match(suite_chunk):
+                    return suite
+        return None
