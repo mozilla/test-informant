@@ -21,7 +21,6 @@ class Build(Document):
     buildid = StringField(required=True)
     buildtype = StringField(required=True)
     platform = StringField(required=True)
-    config = DictField(required=True)
     timestamp = IntField(required=True)
     revision = StringField(required=True)
     total_active_tests = IntField(default=0)

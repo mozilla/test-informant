@@ -36,8 +36,8 @@ def on_build_event(data, message):
     platform = '{}-{}'.format(payload['platform'], payload['buildtype'])
 
     skip = None
-    if not payload['buildurl']:
-        skip = "there is no build url"
+    if 'blobber_files' not in payload:
+        skip = "there are no blobber files"
     elif platform not in config.PLATFORMS:
         skip = "platform not configured"
 

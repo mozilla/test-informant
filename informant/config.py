@@ -46,68 +46,28 @@ def read_runtime_config():
 # a mapping from suite name to dict containing manifest path and parser type
 SUITES = {
     'marionette': {
-        'manifests': ['marionette/tests/testing/marionette/client/marionette/tests/unit-tests.ini'],
-        'parser': IniParser,
-        'relpath': 'marionette/tests',
+        'names' : ['marionette'],
     },
     'mochitest-a11y': {
-        'manifests': ['mochitest/a11y/a11y.ini'],
-        'parser': IniParser,
-        'relpath': 'mochitest/a11y',
-        'extra_config': {
-            'e10s': False,
-            'contentSandbox': 'off',
-        },
+        'names' : ['mochitest-a11y'],
     },
     'mochitest-browser-chrome': {
-        'manifests': ['mochitest/browser/browser-chrome.ini'],
-        'parser': IniParser,
-        'relpath': 'mochitest/browser',
-        'extra_config': {
-            'e10s': False,
-            'contentSandbox': 'off',
-        },
+        'names' :  ["mochitest-browser-chrome", "mochitest-bc"],
     },
     'mochitest-browser-chrome-e10s': {
-        'manifests': ['mochitest/browser/browser-chrome.ini'],
-        'parser': IniParser,
-        'relpath': 'mochitest/browser',
-        'extra_config': {
-            'e10s': True,
-            'contentSandbox': 'off',
-        },
+        'names' : ["mochitest-browser-chrome-e10s", "mochitest-e10s-browser-chrome", "mochitest-bc-e10s"],
     },
     'mochitest-chrome': {
-        'manifests': ['mochitest/chrome/chrome.ini'],
-        'parser': IniParser,
-        'relpath': 'mochitest/chrome',
-        'extra_config': {
-            'e10s': False,
-            'contentSandbox': 'off',
-        },
+        'names' : ['mochitest-chrome'],
     },
     'mochitest-plain-e10s': {
-        'manifests': ['mochitest/tests/mochitest.ini'],
-        'parser': IniParser,
-        'relpath': 'mochitest/tests',
-        'extra_config': {
-            'e10s': True,
-            'contentSandbox': 'off',
-        },
+        'names' : ['mochitest-e10s'],
     },
     'mochitest-plain': {
-        'manifests': ['mochitest/tests/mochitest.ini'],
-        'parser': IniParser,
-        'relpath': 'mochitest/tests',
-        'extra_config': {
-            'e10s': False,
-            'contentSandbox': 'off',
-        },
+        'names' : ['mochitest'],
     },
     'xpcshell': {
-        'manifests': ['xpcshell/tests/xpcshell.ini'],
-        'parser': IniParser,
-        'relpath': 'xpcshell/tests',
+        'names' : ['xpcshell'],
     },
 }
 
@@ -203,6 +163,7 @@ PLATFORMS = {
     'linux64_gecko-opt': [
         'mochitest-plain',
     ] ,
+    """
     'emulator-opt': [
         'marionette',
         'mochitest-plain',
@@ -212,6 +173,7 @@ PLATFORMS = {
         'mochitest-plain',
         'xpchshell',
     ],
+    """
     'mulet-opt': [
         'mochitest-plain',
     ],
