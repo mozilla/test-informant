@@ -6,8 +6,6 @@ from ConfigParser import ConfigParser
 from multiprocessing import cpu_count
 import os
 
-from .parsers import IniParser
-
 
 globals()['pulse'] = {}
 globals()['settings'] = {
@@ -45,11 +43,23 @@ def read_runtime_config():
 
 # a mapping from suite name to dict containing manifest path and parser type
 SUITES = {
+    'gaia-ui-test-accessibility'  : {
+         'names' : ['gaia-ui-test-accessibility'],
+    },
+    'gaia-ui-test-functional'  : {
+         'names' : ['gaia-ui-test-functional'],
+    },
+    'gaia-ui-test-unit'  : {
+         'names' : ['gaia-ui-test-unit'],
+    },
     'marionette': {
         'names' : ['marionette'],
     },
-    'mochitest-a11y': {
-        'names' : ['mochitest-a11y'],
+    'marionette-e10s': {
+        'names' : ['marionette-e10s'],
+    },
+    'marionette-webapi': {
+        'names' : ['marionette-webapi'],
     },
     'mochitest-browser-chrome': {
         'names' :  ["mochitest-browser-chrome", "mochitest-bc"],
@@ -57,14 +67,35 @@ SUITES = {
     'mochitest-browser-chrome-e10s': {
         'names' : ["mochitest-browser-chrome-e10s", "mochitest-e10s-browser-chrome", "mochitest-bc-e10s"],
     },
-    'mochitest-chrome': {
-        'names' : ['mochitest-chrome'],
+    'mochitest-devtools-chrome': {
+        'names' : ['mochitest-devtools-chrome'],
+    },
+    'mochitest-e10s-devtools-chrome': {
+        'names' : ['mochitest-e10s-devtools-chrome'],
+    },
+    'mochitest-other': {
+        'names' : ['mochitest-other'],
+    },
+    'mochitest-gl': {
+        'names' : ['mochitest-gl'],
+    },
+    'mochitest-oop': {
+        'names' : ['mochitest-oop'],
     },
     'mochitest-plain-e10s': {
         'names' : ['mochitest-e10s'],
     },
     'mochitest-plain': {
-        'names' : ['mochitest'],
+        'names' : ['mochitest', 'mochitest-debug'],
+    },
+    'robocop': {
+        'names' : ['robocop'],
+    },
+    'web-platform-tests':{
+        'names' : ['web-platform-tests'],
+    },
+    'web-platform-tests-reftests':{
+        'names' : ['web-platform-tests-reftests'],
     },
     'xpcshell': {
         'names' : ['xpcshell'],
@@ -75,80 +106,208 @@ SUITES = {
 PLATFORMS = {
     'linux-opt': [
         'marionette',
-        'mochitest-a11y',
+        'marionette-e10s',
         'mochitest-browser-chrome',
         'mochitest-browser-chrome-e10s',
-        'mochitest-chrome',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
         'mochitest-plain-e10s',
         'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
         'xpcshell',
     ],
     'linux-debug': [
         'marionette',
-        'mochitest-a11y',
         'mochitest-browser-chrome',
-        'mochitest-chrome',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
         'mochitest-plain-e10s',
         'mochitest-plain',
         'xpcshell',
     ],
-    'linux64-opt': [
+    'linux-pgo': [
         'marionette',
-        'mochitest-a11y',
+        'marionette-e10s',
         'mochitest-browser-chrome',
         'mochitest-browser-chrome-e10s',
-        'mochitest-chrome',
+        'mochitest-devtools-chrome',
+        'mochitest-e10s-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain-e10s',
+        'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
+        'xpcshell',
+    ],
+    'linux64-opt': [
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-e10s-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain-e10s',
+        'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
+        'xpcshell',
+    ],
+    'linux64-pgo': [
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-e10s-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain-e10s',
+        'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
+        'xpcshell',
+    ],
+    'linux64-asan-opt': [
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain-e10s',
+        'mochitest-plain',
+        'xpcshell',
+    ],
+    'linux64_gecko-debug': [
+        'gaia-ui-test-accessibility',
+        'gaia-ui-test-functional',
+        'gaia-ui-test-unit',
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-other',
         'mochitest-plain-e10s',
         'mochitest-plain',
         'xpcshell',
     ],
     'linux64-debug': [
         'marionette',
-        'mochitest-a11y',
         'mochitest-browser-chrome',
-        'mochitest-chrome',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
         'mochitest-plain-e10s',
         'mochitest-plain',
         'xpcshell',
     ],
     'macosx64-opt': [
         'marionette',
-        'mochitest-a11y',
         'mochitest-browser-chrome',
-        'mochitest-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
         'mochitest-plain',
         'xpcshell',
     ],
     'macosx64-debug': [
         'marionette',
-        'mochitest-a11y',
         'mochitest-browser-chrome',
-        'mochitest-chrome',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain',
+        'xpcshell',
+    ],
+    'macosx64_gecko-opt': [
+        'gaia-ui-test-accessibility',
+        'gaia-ui-test-functional',
+        'gaia-ui-test-unit',
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-other',
         'mochitest-plain',
         'xpcshell',
     ],
     'win32-opt': [
         'marionette',
-        'mochitest-a11y',
         'mochitest-browser-chrome',
-        'mochitest-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
         'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
         'xpcshell',
     ],
     'win32-debug': [
         'marionette',
-        'mochitest-a11y',
         'mochitest-browser-chrome',
-        'mochitest-chrome',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
         'mochitest-plain',
+        'xpcshell',
+    ],
+    'win32-pgo': [
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
+        'xpcshell',
+    ],
+    'win64-opt': [
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
+        'xpcshell',
+    ],
+    'win64-debug': [
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain',
+        'xpcshell',
+    ],
+    'win64-pgo': [
+        'marionette',
+        'mochitest-browser-chrome',
+        'mochitest-browser-chrome-e10s',
+        'mochitest-devtools-chrome',
+        'mochitest-gl',
+        'mochitest-other',
+        'mochitest-plain',
+        'web-platform-tests',
+        'web-platform-tests-reftests',
         'xpcshell',
     ],
     'android-api-9-opt': [
         'mochitest-plain',
+        'mochitest-gl',
+        'robocop',
         'xpcshell',
     ],
     'android-api-11-opt': [
         'mochitest-plain',
+        'mochitest-gl',
         'xpcshell',
     ],
     'android-api-11-debug': [
@@ -161,19 +320,22 @@ PLATFORMS = {
         'mochitest-plain',
     ],
     'linux64_gecko-opt': [
+        'gaia-ui-test-accessibility',
+        'gaia-ui-test-functional',
+        'gaia-ui-test-unit',
+        'mochitest-oop',
         'mochitest-plain',
     ] ,
-    """
     'emulator-opt': [
         'marionette',
+        'marionette-webapi',
         'mochitest-plain',
         'xpcshell',
     ],
     'emulator-debug': [
         'mochitest-plain',
-        'xpchshell',
+        'xpcshell',
     ],
-    """
     'mulet-opt': [
         'mochitest-plain',
     ],
