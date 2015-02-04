@@ -68,14 +68,18 @@ class Worker(threading.Thread):
             else:
                 active.append(log_item['test'])
 
-        for filename, url in data['blobber_files'].iteritems():
-            if filename.endswith('_raw.log'):
-                log_path = self._prepare_mozlog(url)
-                with open(log_path, 'r') as log:
-                    iterator = reader.read(log)
-                    action_map = {"test_end": append_active_or_skipped}
-                    reader.each_log(iterator, action_map)
-                mozfile.remove(log_path)
+        structured_logs = [(fn, url) for fn, url in data['blobber_files'].iteritems() if fn.endswith('_raw.log')]
+        # break if there are no _raw.log files
+        if not structured_logs:
+            return
+
+        for filename, url in structured_logs:
+            log_path = self._prepare_mozlog(url)
+            with open(log_path, 'r') as log:
+                iterator = reader.read(log)
+                action_map = {"test_end": append_active_or_skipped}
+                reader.each_log(iterator, action_map)
+            mozfile.remove(log_path)
         logger.debug("found {} active tests and {} skipped tests".format(len(active), len(skipped)))
 
         with lock:
