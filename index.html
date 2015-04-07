@@ -1,0 +1,109 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test Informant</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-multiselect.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-datepicker.standalone.min.css">
+    <link rel="stylesheet" type="text/css" href="css/informant.css">
+
+</head>
+
+<body>
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Test Informant</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="#about">About</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
+
+<div class="container" role="main">
+    <div class="form-group">
+        <label for="suite-selection" class="control-label">Suite</label>
+        <div>
+            <select id="suite-selection" multiple="multiple">
+                <option value="marionette">marionette</option>
+                <option value="mochitest-a11y">mochitest a11y</option>
+                <option value="mochitest-browser-chrome">mochitest browser-chrome</option>
+                <option value="mochitest-chrome">mochitest chrome</option>
+                <option value="mochitest-plain">mochitest plain</option>
+                <option value="xpcshell">xpcshell</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="branch-selection" class="control-label">Branch</label>
+        <div>
+            <select id="branch-selection">
+                <option value="b2g-inbound">b2g-inbound</option>
+                <option value="fx-team">fx-team</option>
+                <option value="mozilla-aurora">mozilla-aurora</option>
+                <option value="mozilla-beta">mozilla-beta</option>
+                <option value="mozilla-central" selected="selected">mozilla-central</option>
+                <option value="mozilla-inbound">mozilla-inbound</option>
+                <option value="mozilla-release">mozilla-release</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="date-selection" class="control-label">Range</label> 
+        <div id="date-selection" class="input-daterange">
+            <input type="text" class="from-date input-small"/>
+            <span class="add-on" style="vertical-align:top;height:25px">to</span>
+            <input type="text" class="to-date input-small"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div>
+            <button class="btn btn-primary" onclick="generate();">Generate Report</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/bootstrap-multiselect.js"></script>
+<script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript" src="js/informant.js"></script>
+<script type="text/javascript">
+    Date.prototype.toDateInputValue = (function() {
+        var local = new Date(this);
+        local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+        return local.toJSON().slice(0, 10);
+    });
+
+    $(document).ready(function() {
+        $('#suite-selection').multiselect({
+            includeSelectAllOption: true
+        });
+        $('#suite-selection').multiselect('selectAll', false);
+        $('#suite-selection').multiselect('updateButtonText');
+        $('#branch-selection').multiselect();
+        $('#date-selection').datepicker({
+            autoclose: true,
+            endDate: new Date(),
+            format: "dd/mm/yyyy",
+            orientation: "top",
+            startDate: new Date(2015, 3, 1),
+            todayBtn: "linked"
+        });
+    });
+</script>
+</body>
+</html>
