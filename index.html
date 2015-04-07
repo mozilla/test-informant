@@ -61,7 +61,7 @@
     </div>
 
     <div class="form-group">
-        <label for="date-selection" class="control-label">Range</label> 
+        <label for="date-selection" class="control-label">Range</label>
         <div id="date-selection" class="input-daterange">
             <input type="text" class="from-date input-small"/>
             <span class="add-on" style="vertical-align:top;height:25px">to</span>
@@ -71,7 +71,7 @@
 
     <div class="form-group">
         <div>
-            <button class="btn btn-primary" onclick="generate();">Generate Report</button>
+            <button class="btn btn-primary" onclick="report.generate();">Generate Report</button>
         </div>
     </div>
 </div>
@@ -82,12 +82,6 @@
 <script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
 <script type="text/javascript" src="js/informant.js"></script>
 <script type="text/javascript">
-    Date.prototype.toDateInputValue = (function() {
-        var local = new Date(this);
-        local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
-        return local.toJSON().slice(0, 10);
-    });
-
     $(document).ready(function() {
         $('#suite-selection').multiselect({
             includeSelectAllOption: true
@@ -95,14 +89,24 @@
         $('#suite-selection').multiselect('selectAll', false);
         $('#suite-selection').multiselect('updateButtonText');
         $('#branch-selection').multiselect();
+
+        var endDate = new Date();
+        var fromDate = new Date();
+        var toDate = new Date();
+        fromDate.setDate(endDate.getDate()-2);
+        toDate.setDate(endDate.getDate()-1);
         $('#date-selection').datepicker({
             autoclose: true,
-            endDate: new Date(),
-            format: "dd/mm/yyyy",
+            endDate: endDate,
+            format: "yyyy-mm-dd",
             orientation: "top",
             startDate: new Date(2015, 3, 1),
             todayBtn: "linked"
         });
+        $('#date-selection .from-date').datepicker('setDate', fromDate);
+        $('#date-selection .from-date').datepicker('update');
+        $('#date-selection .to-date').datepicker('setDate', toDate);
+        $('#date-selection .to-date').datepicker('update');
     });
 </script>
 </body>
