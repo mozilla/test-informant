@@ -32,47 +32,56 @@
 </nav>
 
 <div class="container" role="main">
-    <div class="form-group">
-        <label for="suite-selection" class="control-label">Suite</label>
-        <div>
-            <select id="suite-selection" multiple="multiple">
-                <option value="marionette">marionette</option>
-                <option value="mochitest-a11y">mochitest a11y</option>
-                <option value="mochitest-browser-chrome">mochitest browser-chrome</option>
-                <option value="mochitest-chrome">mochitest chrome</option>
-                <option value="mochitest-plain">mochitest plain</option>
-                <option value="xpcshell">xpcshell</option>
-            </select>
+    <div class="form">
+        <div id="suite-group" class="form-group">
+            <label for="suite-selection" class="control-label">Suite
+            <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+            <div>
+                <select id="suite-selection" multiple="multiple" class="form-control">
+                    <option value="marionette">marionette</option>
+                    <option value="mochitest-a11y">mochitest a11y</option>
+                    <option value="mochitest-browser-chrome">mochitest browser-chrome</option>
+                    <option value="mochitest-chrome">mochitest chrome</option>
+                    <option value="mochitest-plain">mochitest plain</option>
+                    <option value="xpcshell">xpcshell</option>
+                </select>
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label for="branch-selection" class="control-label">Branch</label>
-        <div>
-            <select id="branch-selection">
-                <option value="b2g-inbound">b2g-inbound</option>
-                <option value="fx-team">fx-team</option>
-                <option value="mozilla-aurora">mozilla-aurora</option>
-                <option value="mozilla-beta">mozilla-beta</option>
-                <option value="mozilla-central" selected="selected">mozilla-central</option>
-                <option value="mozilla-inbound">mozilla-inbound</option>
-                <option value="mozilla-release">mozilla-release</option>
-            </select>
+        <div id="branch-group" class="form-group">
+            <label for="branch-selection" class="control-label">Branch</label>
+            <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+            <div>
+                <select id="branch-selection" class="form-control">
+                    <option value="b2g-inbound">b2g-inbound</option>
+                    <option value="fx-team">fx-team</option>
+                    <option value="mozilla-aurora">mozilla-aurora</option>
+                    <option value="mozilla-beta">mozilla-beta</option>
+                    <option value="mozilla-central" selected="selected">mozilla-central</option>
+                    <option value="mozilla-inbound">mozilla-inbound</option>
+                    <option value="mozilla-release">mozilla-release</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="date-group" class="form-group">
+            <label for="date-selection" class="control-label">Range</label>
+            <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+            <div id="date-selection" class="input-daterange">
+                <input type="text" class="from-date input-small"/>
+                <span class="add-on" style="vertical-align:top;height:25px">to</span>
+                <input type="text" class="to-date input-small"/>
+            </div>
+        </div>
+
+        <div id="generate-group" class="form-group">
+            <div>
+                <button id="generate-button" class="btn btn-primary" onclick="report.generate();">Generate Report</button>
+            </div>
+            <span id="generate-status"></span>
         </div>
     </div>
 
-    <div class="form-group">
-        <label for="date-selection" class="control-label">Range</label>
-        <div id="date-selection" class="input-daterange">
-            <input type="text" class="from-date input-small"/>
-            <span class="add-on" style="vertical-align:top;height:25px">to</span>
-            <input type="text" class="to-date input-small"/>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div>
-            <button class="btn btn-primary" onclick="report.generate();">Generate Report</button>
-        </div>
+    <div class="report">
     </div>
 </div>
 
@@ -80,14 +89,12 @@
 <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/bootstrap-multiselect.js"></script>
 <script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
-<script type="text/javascript" src="js/informant.js"></script>
+<script type="text/javascript" src="js/report.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         $('#suite-selection').multiselect({
             includeSelectAllOption: true
         });
-        $('#suite-selection').multiselect('selectAll', false);
-        $('#suite-selection').multiselect('updateButtonText');
         $('#branch-selection').multiselect();
 
         var endDate = new Date();
