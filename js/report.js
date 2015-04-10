@@ -114,11 +114,18 @@ ReportFormatter.prototype = {
     return data;
   },
 
-  format: function(fromData, toData) {
+  format: function(fromData, toData, context) {
     var data = this.reduce(this.map(fromData), this.map(toData));
     $('.form').css('border-bottom', '1px solid lightgrey');
 
-    console.log(data);
+    context['totalPercentage'] = Math.round(data['totalActive'] / (data['totalActive'] + data['totalSkipped']) * 100);
+    context['suites'] = data['suites'];
+
+    var source = $('#report-template').html();
+    var template = Handlebars.compile(source);
+    var report = template(context);
+    $('#report').html(report);
+
     $('#generate-button').prop('disabled', false);
     $('#generate-button').html('Generate Report');
     $('#generate-status').html('');
@@ -200,6 +207,11 @@ ReportGenerator.prototype = {
       return 1;
     }
 
+    var context = {
+      fromDate: fromDate,
+      toDate: toDate
+    }
+
     $('#generate-button').prop('disabled', true);
     $('#generate-button').html('<span class="glyphicon glyphicon-refresh spinning"></span> Working...');
     $('#generate-status').html('Querying the database, this could take a bit.');
@@ -212,10 +224,10 @@ ReportGenerator.prototype = {
     var fmt = this.fmt;
     fromPromise.then(function(fromResponse) {
       if (fromDate == toDate) {
-        fmt.format(fromResponse.data, fromResponse.data);
+        fmt.format(fromResponse.data, fromResponse.data, context);
       } else {
         toPromise.then(function(toResponse) {
-          fmt.format(fromResponse.data, toResponse.data);
+          fmt.format(fromResponse.data, toResponse.data, context);
         });
       }
     });
