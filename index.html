@@ -38,12 +38,31 @@
             <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
             <div>
                 <select id="suite-selection" multiple="multiple" class="form-control">
+                    <option value="androidx86-set">androidx86-set</option>
+                    <option value="gaia-ui-test-a11y">gaia-ui-test-a11y</option>
+                    <option value="gaia-ui-test-functional">gaia-ui-test-functional</option>
+                    <option value="gaia-ui-test-unit">gaia-ui-test-unit</option>
+                    <option value="gaia-unit">gaia-unit</option>
                     <option value="marionette">marionette</option>
-                    <option value="mochitest-a11y">mochitest a11y</option>
-                    <option value="mochitest-browser-chrome">mochitest browser-chrome</option>
-                    <option value="mochitest-chrome">mochitest chrome</option>
-                    <option value="mochitest-plain">mochitest plain</option>
+                    <option value="marionette-e10s">marionette-e10s</option>
+                    <option value="marionette-webapi">marionette-webapi</option>
+                    <option value="mochitest-a11y">mochitest-a11y</option>
+                    <option value="mochitest-browser-chrome">mochitest-browser-chrome</option>
+                    <option value="mochitest-e10s-browser-chrome">mochitest-browser-chrome-e10s</option>
+                    <option value="mochitest-chrome">mochitest-chrome</option>
+                    <option value="mochitest-debug">mochitest-debug</option>
+                    <option value="mochitest-devtools-chrome">mochitest-devtools-chrome</option>
+                    <option value="mochitest-e10s-devtools-chrome">mochitest-devtools-chrome-e10s</option>
+                    <option value="mochitest-gl">mochitest-gl</option>
+                    <option value="mochitest-jetpack">mochitest-jetpack</option>
+                    <option value="mochitest-oop">mochitest-oop</option>
+                    <option value="mochitest-other">mochitest-other</option>
+                    <option value="mochitest">mochitest-plain</option>
+                    <option value="mochitest-e10s">mochitest-plain-e10s</option>
+                    <option value="robocop">robocop</option>
                     <option value="xpcshell">xpcshell</option>
+                    <option value="web-platform-tests">web-platform-tests</option>
+                    <option value="web-platform-tests-reftests">web-platform-tests-reftests</option>
                 </select>
             </div>
         </div>
@@ -85,7 +104,7 @@
     </div>
 </div>
 
-<script id="report-template" type="text/x-handlebars-template">
+<script id="report-header-template" type="text/x-handlebars-template">
 <div class="page-header">
     <h4>Test Informant Report</h3>
     <div>Showing tests enabled or disabled between {{ fromDate }} and {{ toDate }}.</div>
@@ -93,21 +112,94 @@
 </div>
 <div id="data">
     <div id="suites-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
-        {{#each suites}}
-            <div class="panel panel-default">
-                <div id="{{@key}}-heading" class="panel-heading" role="tab">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#suites-accordion" href="#{{@key-collapse}}" aria-expanded="true" aria-controls="{{@key-collapse}}">{{@key}}</a>
-                    </h4>
-                </div>
-                <div id="{{@key}}-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{@key}}-heading">
-                    <div class="panel-body">
-
-                    </div>
-                </div> 
-            </div>
-        {{/each}}
     </div>
+</div>
+</script>
+
+<script id="report-suite-template" type="text/x-handlebars-template">
+<div id="{{suite}}-panel" class="panel panel-default">
+    <div id="{{suite}}-heading" class="panel-heading" role="tab">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#suites-accordion" href="#{{suite}}-collapse" aria-expanded="true" aria-controls="{{suite}}-collapse">{{suite}}</a>
+        </h4>
+    </div>
+    <div id="{{suite}}-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-heading">
+        <div class="panel-body">
+            <div id="{{suite}}-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
+            </div>
+        </div>
+    </div> 
+</div>
+</script>
+
+<script id="report-platform-template" type="text/x-handlebars-template">
+<div id="{{suite}}-{{platform}}-panel" class="panel panel-default">
+    <div id="{{suite}}-{{platform}}-heading" class="panel-heading" role="tab">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#{{suite}}-accordion" href="#{{suite}}-{{platform}}-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-collapse">{{platform}}</a>
+        </h4>
+    </div>
+    <div id="{{suite}}-{{platform}}-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-heading">
+        <div class="panel-body">
+            <div class="panel panel-default">
+                <ul>
+                    <li>Total tests: {{total}}</li>
+                    <li>Total active tests: {{totalActive}}</li>
+                </ul>
+            </div>
+            <div id="{{suite}}-{{platform}}-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
+                <div id="{{suite}}-{{platform}}-skipped-panel" class="panel panel-default">
+                    <div id="{{suite}}-{{platform}}-skipped-heading" class="panel-heading" role="tab">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-skipped-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-skipped-collapse">skipped tests: {{totalSkipped}}</a>
+                        </h4>
+                    </div>
+                    <div id="{{suite}}-{{platform}}-skipped-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-skipped-heading">
+                        <div class="panel-body">
+                            <div class="list-group">
+                                {{#each skipped}}
+                                    <a href="#" class="list-group-item">{{this}}</a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="{{suite}}-{{platform}}-added-panel" class="panel panel-default">
+                    <div id="{{suite}}-{{platform}}-added-heading" class="panel-heading" role="tab">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-added-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-added-collapse">added tests: {{totalAdded}}</a>
+                        </h4>
+                    </div>
+                    <div id="{{suite}}-{{platform}}-added-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-added-heading">
+                        <div class="panel-body">
+                            <div class="list-group">
+                                {{#each added}}
+                                    <a href="#" class="list-group-item">{{this}}</a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="{{suite}}-{{platform}}-removed-panel" class="panel panel-default">
+                    <div id="{{suite}}-{{platform}}-removed-heading" class="panel-heading" role="tab">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-removed-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-removed-collapse">removed tests: {{totalRemoved}}</a>
+                        </h4>
+                    </div>
+                    <div id="{{suite}}-{{platform}}-removed-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-removed-heading">
+                        <div class="panel-body">
+                            <div class="list-group">
+                                {{#each removed}}
+                                    <a href="#" class="list-group-item">{{this}}</a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div> 
 </div>
 </script>
 
@@ -142,17 +234,15 @@
         $('#date-selection .to-date').datepicker('setDate', toDate);
         $('#date-selection .to-date').datepicker('update');
 
-        Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
-            lvalue = parseFloat(lvalue);
-            rvalue = parseFloat(rvalue);
-
-            return {
-                "+": lvalue + rvalue,
-                "-": lvalue - rvalue,
-                "*": lvalue * rvalue,
-                "/": lvalue / rvalue,
-                "%": lvalue % rvalue
-            }[operator];
+        Handlebars.registerHelper("ifeq", function(a, b, options) {
+            if (a == b) {
+                return options.fn(this);
+            }
+        });
+        Handlebars.registerHelper("ifneq", function(a, b, options) {
+            if (a != b) {
+                return options.fn(this);
+            }
         });
     });
 </script>

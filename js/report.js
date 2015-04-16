@@ -78,24 +78,25 @@ ReportFormatter.prototype = {
         var added = [];
         var removed = [];
         if (suite in fromData && platform in fromData[suite]) {
-          for (var test in tests['active']) {
-            if (!(test in fromData[suite][platform]['active'])) {
+          for (var i = 0; i < tests['active'].length; ++i) {
+            var test = tests['active'][i];
+            if (fromData[suite][platform]['active'].indexOf(test) == -1) {
               added.push(test);
             }
           }
 
-          for (var test in fromData[suite][platform]['active']) {
-            if (!(test in tests['active'])) {
+          for (var i = 0; i < fromData[suite][platform]['active'].length; ++i) {
+            var test = fromData[suite][platform]['active'][i];
+            if (tests['active'].indexOf(test) == -1) {
               removed.push(test);
             }
           }
         }
 
-        data['suites'][suite][platform]['totalActive'] = tests['active'].length;
-        data['suites'][suite][platform]['totalSkipped'] = tests['skipped'].length;
-        data['suites'][suite][platform]['skipped'] = tests['skipped'];
-        data['suites'][suite][platform]['added'] = added;
-        data['suites'][suite][platform]['removed'] = removed;
+        data['suites'][suite][platform]['active'] = tests['active'].sort();
+        data['suites'][suite][platform]['skipped'] = tests['skipped'].sort();
+        data['suites'][suite][platform]['added'] = added.sort();
+        data['suites'][suite][platform]['removed'] = removed.sort();
 
         totalSuiteActive += tests['active'].length;
         totalSuiteSkipped += tests['skipped'].length;
@@ -119,12 +120,49 @@ ReportFormatter.prototype = {
     $('.form').css('border-bottom', '1px solid lightgrey');
 
     context['totalPercentage'] = Math.round(data['totalActive'] / (data['totalActive'] + data['totalSkipped']) * 100);
-    context['suites'] = data['suites'];
 
-    var source = $('#report-template').html();
-    var template = Handlebars.compile(source);
-    var report = template(context);
-    $('#report').html(report);
+    var headerTemplate = Handlebars.compile($('#report-header-template').html());
+    var suiteTemplate = Handlebars.compile($('#report-suite-template').html());
+    var platformTemplate = Handlebars.compile($('#report-platform-template').html());
+
+    var header = headerTemplate(context);
+    $('#report').html(header);
+
+    var suiteNames = Object.keys(data['suites']).sort();
+    for (var i = 0; i < suiteNames.length; ++i) {
+      var suite = suiteNames[i];
+      context = {
+        suite: suite
+      }
+      var suitePanel = suiteTemplate(context);
+      $('#suites-accordion').append(suitePanel);
+
+      // TODO meta
+      
+      var platformNames = Object.keys(data['suites'][suite]).sort();
+      for (var i = 0; i < platformNames.length; ++i) {
+        var platform = platformNames[i];
+        if (platform == 'meta') {
+          continue;
+        }
+        
+        pObj = data['suites'][suite][platform];
+
+        context['platform'] = platform
+        context['total'] = pObj['active'].length + pObj['skipped'].length;
+        context['totalActive'] = pObj['active'].length;
+        context['totalSkipped'] = pObj['skipped'].length;
+        context['totalAdded'] = pObj['added'].length;
+        context['totalRemoved'] = pObj['removed'].length;
+
+        for (var attr in pObj) {
+          context[attr] = pObj[attr];
+        }
+
+        var platformPanel = platformTemplate(context);
+        $('#' + suite + '-accordion').append(platformPanel);
+      }
+    }
 
     $('#generate-button').prop('disabled', false);
     $('#generate-button').html('Generate Report');
