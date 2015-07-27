@@ -140,8 +140,8 @@ ReportFormatter.prototype = {
       // TODO meta
       
       var platformNames = Object.keys(data['suites'][suite]).sort();
-      for (var i = 0; i < platformNames.length; ++i) {
-        var platform = platformNames[i];
+      for (var j = 0; j < platformNames.length; ++j) {
+        var platform = platformNames[j];
         if (platform == 'meta') {
           continue;
         }
@@ -252,7 +252,7 @@ ReportGenerator.prototype = {
 
     $('#generate-button').prop('disabled', true);
     $('#generate-button').html('<span class="glyphicon glyphicon-refresh spinning"></span> Working...');
-    $('#generate-status').html('Querying the database, this could take a bit.');
+    $('#generate-status').html('Querying the database, this can take awhile.');
 
     var fromPromise = this.queryDate(suites, branch, fromDate);
     if (fromDate != toDate) {
@@ -260,15 +260,27 @@ ReportGenerator.prototype = {
     }
 
     var fmt = this.fmt;
+    var resetButton = function() {
+      $('#generate-button').prop('disabled', false);
+      $('#generate-button').html('Generate Report');
+      $('#generate-status').html('');
+    };
+    var onError = function() {
+      resetButton();
+      $('#report').html("Something went wrong: " + error);
+    };
+
     fromPromise.then(function(fromResponse) {
       if (fromDate == toDate) {
+        resetButton();
         fmt.format(fromResponse.data, fromResponse.data, context);
       } else {
         toPromise.then(function(toResponse) {
+          resetButton();
           fmt.format(fromResponse.data, toResponse.data, context);
-        });
+        }, onError);
       }
-    });
+    }, onError);
   }
 }
 
