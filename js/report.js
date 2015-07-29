@@ -13,167 +13,68 @@ ActiveData.prototype = {
 }
 
 
-function ReportFormatter() {
+function ReportFormatter(fromDate, toDate) {
+  var self = this;
+  this.worker = new Worker('file:///home/ahal/git/test-informant/js/worker.js');
+  this.worker.addEventListener('message', function(e) {
+    var cmd = e.data.cmd;
+    switch(cmd) {
+      case 'mapreduce':
+        self.generateHtml(e.data.payload);
+        break;
+      case 'generate':
+        self.attachHtml(e.data.payload);
+        break;
+      default:
+        throw 'Unknown command: ' + cmd;
+    };
+  }, false);
+  this.fromDate = fromDate;
+  this.toDate = toDate;
 }
 
 ReportFormatter.prototype = {
-  map: function(data) {
-    var normdata = {}
-    for (var i = 0; i < data.length; ++i) {
-      var [platform, type, suite, test, result, count] = data[i];
-      platform = platform + '-' + type;
-
-      if (!(suite in normdata)) {
-        normdata[suite] = {};
-      }
-
-      if (!(platform in normdata[suite])) {
-        normdata[suite][platform] = {
-          active: [],
-          skipped: []
-        }
-      }
-
-      var index = normdata[suite][platform]['active'].indexOf(test);
-      if (index > -1) {
-        normdata[suite][platform]['active'].splice(index, 1);
-      }
-
-      var index = normdata[suite][platform]['skipped'].indexOf(test);
-      if (index > -1) {
-        normdata[suite][platform]['skipped'].splice(index, 1);
-      }
-
-      if (result == 'SKIP') {
-        normdata[suite][platform]['skipped'].push(test);
-      } else {
-        normdata[suite][platform]['active'].push(test);
-      }
-
-    }
-
-    return normdata;
-  },
-
-  reduce: function(fromData, toData) {
-    var data = {
-      suites: {},
-      totalSkipped: 0,
-      totalActive: 0
-    }
-
-    for (var suite in toData) {
-      data['suites'][suite] = {};
-      data['suites'][suite]['meta'] = {};
-
-      var totalSuiteActive = 0;
-      var totalSuiteSkipped = 0;
-      var totalSuiteAdded = 0;
-      var totalSuiteRemoved = 0;
-
-      for (var platform in toData[suite]) {
-        data['suites'][suite][platform] = {};
-
-        var tests = toData[suite][platform];
-        var added = [];
-        var removed = [];
-        if (suite in fromData && platform in fromData[suite]) {
-          for (var i = 0; i < tests['active'].length; ++i) {
-            var test = tests['active'][i];
-            if (fromData[suite][platform]['active'].indexOf(test) == -1) {
-              added.push(test);
-            }
-          }
-
-          for (var i = 0; i < fromData[suite][platform]['active'].length; ++i) {
-            var test = fromData[suite][platform]['active'][i];
-            if (tests['active'].indexOf(test) == -1) {
-              removed.push(test);
-            }
-          }
-        }
-
-        data['suites'][suite][platform]['active'] = tests['active'].sort();
-        data['suites'][suite][platform]['skipped'] = tests['skipped'].sort();
-        data['suites'][suite][platform]['added'] = added.sort();
-        data['suites'][suite][platform]['removed'] = removed.sort();
-
-        totalSuiteActive += tests['active'].length;
-        totalSuiteSkipped += tests['skipped'].length;
-        totalSuiteAdded += added.length;
-        totalSuiteRemoved += removed.length;
-      }
-
-      data['suites'][suite]['meta']['totalActive'] = totalSuiteActive;
-      data['suites'][suite]['meta']['totalSkipped'] = totalSuiteSkipped;
-      data['suites'][suite]['meta']['totalAdded'] = totalSuiteAdded;
-      data['suites'][suite]['meta']['totalRemoved'] = totalSuiteRemoved;
-      data['totalActive'] += totalSuiteActive;
-      data['totalSkipped'] += totalSuiteSkipped;
-    }
-
-    return data;
-  },
-
-  format: function(fromData, toData, context) {
-    var data = this.reduce(this.map(fromData), this.map(toData));
+  attachHtml: function(data) {
     $('.form').css('border-bottom', '1px solid lightgrey');
+    $('#report').html(data.header);
 
-    context['totalPercentage'] = Math.round(data['totalActive'] / (data['totalActive'] + data['totalSkipped']) * 100);
-
-    var headerTemplate = Handlebars.compile($('#report-header-template').html());
-    var suiteTemplate = Handlebars.compile($('#report-suite-template').html());
-    var platformTemplate = Handlebars.compile($('#report-platform-template').html());
-
-    var header = headerTemplate(context);
-    $('#report').html(header);
-
-    var suiteNames = Object.keys(data['suites']).sort();
+    var suites = data.suites;
+    var suiteNames = Object.keys(suites).sort();
     for (var i = 0; i < suiteNames.length; ++i) {
       var suite = suiteNames[i];
-      context = {
-        suite: suite
-      }
-      var suitePanel = suiteTemplate(context);
+      var suitePanel = suites[suite].panel;
       $('#suites-accordion').append(suitePanel);
 
-      // TODO meta
-      
-      var platformNames = Object.keys(data['suites'][suite]).sort();
-      for (var j = 0; j < platformNames.length; ++j) {
-        var platform = platformNames[j];
-        if (platform == 'meta') {
-          continue;
-        }
-        
-        pObj = data['suites'][suite][platform];
-
-        context['platform'] = platform
-        context['total'] = pObj['active'].length + pObj['skipped'].length;
-        context['totalActive'] = pObj['active'].length;
-        context['totalSkipped'] = pObj['skipped'].length;
-        context['totalAdded'] = pObj['added'].length;
-        context['totalRemoved'] = pObj['removed'].length;
-
-        for (var attr in pObj) {
-          context[attr] = pObj[attr];
-        }
-
-        var platformPanel = platformTemplate(context);
+      for (var j = 0; j < suites[suite].platforms.length; ++j) {
+        var platformPanel = suites[suite].platforms[j];
         $('#' + suite + '-accordion').append(platformPanel);
       }
     }
-
     $('#generate-button').prop('disabled', false);
     $('#generate-button').html('Generate Report');
     $('#generate-status').html('');
+  },
+
+  generateHtml: function(data) {
+    payload = {
+      fromDate: this.fromDate,
+      toDate: this.toDate,
+      data: data
+    }
+
+    this.worker.postMessage({cmd: 'generate', payload: payload});
+  },
+
+  format: function(fromData, toData) {
+    $('#generate-status').html('Generating report...');
+    var payload = {fromData: fromData, toData: toData};
+    this.worker.postMessage({cmd: 'mapreduce', payload: payload});
   }
 }
 
 
 function ReportGenerator() {
   this.ad = new ActiveData();
-  this.fmt = new ReportFormatter();
 }
 
 ReportGenerator.prototype = {
@@ -240,44 +141,35 @@ ReportGenerator.prototype = {
     var branch = $('#branch-selection option:selected')[0].value;
     var fromDate = $('#date-selection .from-date').val();
     var toDate = $('#date-selection .to-date').val();
-
+    
     if (!this.validate(suites, branch, fromDate, toDate)) {
       return 1;
     }
 
-    var context = {
-      fromDate: fromDate,
-      toDate: toDate
-    }
-
     $('#generate-button').prop('disabled', true);
     $('#generate-button').html('<span class="glyphicon glyphicon-refresh spinning"></span> Working...');
-    $('#generate-status').html('Querying the database, this can take awhile.');
+    $('#generate-status').html('Querying database...');
 
     var fromPromise = this.queryDate(suites, branch, fromDate);
     if (fromDate != toDate) {
       var toPromise = this.queryDate(suites, branch, toDate);
     }
 
-    var fmt = this.fmt;
-    var resetButton = function() {
+    var fmt = new ReportFormatter(fromDate, toDate);
+    var onError = function(error) {
       $('#generate-button').prop('disabled', false);
       $('#generate-button').html('Generate Report');
       $('#generate-status').html('');
-    };
-    var onError = function() {
-      resetButton();
-      $('#report').html("Something went wrong: " + error);
+      $('#report').html("Something went wrong :(.<br>Status: " + error.status + " " + error.statusText);
+      console.log("Query failed: %o", error);
     };
 
     fromPromise.then(function(fromResponse) {
       if (fromDate == toDate) {
-        resetButton();
-        fmt.format(fromResponse.data, fromResponse.data, context);
+        fmt.format(fromResponse.data, fromResponse.data);
       } else {
         toPromise.then(function(toResponse) {
-          resetButton();
-          fmt.format(fromResponse.data, toResponse.data, context);
+          fmt.format(fromResponse.data, toResponse.data);
         }, onError);
       }
     }, onError);
