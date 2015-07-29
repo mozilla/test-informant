@@ -157,9 +157,6 @@ self.addEventListener('message', function(e) {
   var cmd = e.data.cmd;
   var payload = e.data.payload;
 
-  console.log(e);
-  console.log(payload);
-
   switch(cmd) {
     case 'mapreduce':
       payload = reduce(map(payload.fromData), map(payload.toData));
