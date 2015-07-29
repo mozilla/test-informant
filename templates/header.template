@@ -1,0 +1,9 @@
+<div class="page-header">
+    <h4>Test Informant Report</h3>
+    <div>Showing tests enabled or disabled between {{ fromDate }} and {{ toDate }}.</div>
+    <div>{{ totalPercentage }}% of tests across all suites and configurations are enabled.</div>
+</div>
+<div id="data">
+    <div id="suites-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
+    </div>
+</div>

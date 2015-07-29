@@ -1,0 +1,13 @@
+<div id="{{suite}}-panel" class="panel panel-default">
+    <div id="{{suite}}-heading" class="panel-heading" role="tab">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#suites-accordion" href="#{{suite}}-collapse" aria-expanded="true" aria-controls="{{suite}}-collapse">{{suite}}</a>
+        </h4>
+    </div>
+    <div id="{{suite}}-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-heading">
+        <div class="panel-body">
+            <div id="{{suite}}-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
+            </div>
+        </div>
+    </div> 
+</div>

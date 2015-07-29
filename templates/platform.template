@@ -1,0 +1,68 @@
+<div id="{{suite}}-{{platform}}-panel" class="panel panel-default">
+    <div id="{{suite}}-{{platform}}-heading" class="panel-heading" role="tab">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#{{suite}}-accordion" href="#{{suite}}-{{platform}}-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-collapse">{{platform}}</a>
+        </h4>
+    </div>
+    <div id="{{suite}}-{{platform}}-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-heading">
+        <div class="panel-body">
+            <div class="panel panel-default">
+                <ul>
+                    <li>Total tests: {{total}}</li>
+                    <li>Total active tests: {{totalActive}}</li>
+                </ul>
+            </div>
+            <div id="{{suite}}-{{platform}}-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
+                <div id="{{suite}}-{{platform}}-skipped-panel" class="panel panel-default">
+                    <div id="{{suite}}-{{platform}}-skipped-heading" class="panel-heading" role="tab">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-skipped-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-skipped-collapse">skipped tests: {{totalSkipped}}</a>
+                        </h4>
+                    </div>
+                    <div id="{{suite}}-{{platform}}-skipped-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-skipped-heading">
+                        <div class="panel-body">
+                            <div class="list-group">
+                                {{#each skipped}}
+                                    <a href="#" class="list-group-item">{{this}}</a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="{{suite}}-{{platform}}-added-panel" class="panel panel-default">
+                    <div id="{{suite}}-{{platform}}-added-heading" class="panel-heading" role="tab">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-added-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-added-collapse">added tests: {{totalAdded}}</a>
+                        </h4>
+                    </div>
+                    <div id="{{suite}}-{{platform}}-added-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-added-heading">
+                        <div class="panel-body">
+                            <div class="list-group">
+                                {{#each added}}
+                                    <a href="#" class="list-group-item">{{this}}</a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="{{suite}}-{{platform}}-removed-panel" class="panel panel-default">
+                    <div id="{{suite}}-{{platform}}-removed-heading" class="panel-heading" role="tab">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-removed-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-removed-collapse">removed tests: {{totalRemoved}}</a>
+                        </h4>
+                    </div>
+                    <div id="{{suite}}-{{platform}}-removed-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-removed-heading">
+                        <div class="panel-body">
+                            <div class="list-group">
+                                {{#each removed}}
+                                    <a href="#" class="list-group-item">{{this}}</a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div> 
+</div>
