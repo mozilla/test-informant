@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-importScripts('file:///home/ahal/git/test-informant/js/libs/handlebars.runtime.js');
-importScripts('file:///home/ahal/git/test-informant/js/templates.js');
+importScripts('js/libs/handlebars.runtime.js');
+importScripts('js/templates.js');
 
 function map(data) {
   var normdata = {}

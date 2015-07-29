@@ -15,7 +15,7 @@ ActiveData.prototype = {
 
 function ReportFormatter(fromDate, toDate) {
   var self = this;
-  this.worker = new Worker('file:///home/ahal/git/test-informant/js/worker.js');
+  this.worker = new Worker('js/worker.js');
   this.worker.addEventListener('message', function(e) {
     var cmd = e.data.cmd;
     switch(cmd) {
