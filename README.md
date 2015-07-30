@@ -1,30 +1,11 @@
 Test Informant
 ==============
 
-Web service for monitoring and reporting the state of test manifests.
+A tool for inspecting the current state of running tests at Mozilla. It uses the [ActiveData][0]
+service as its data source, and can generate HTML formatted reports containing information like
+how many tests are running, skipped, added or removed over a given time period.
 
+For more information, see the [project page][1].
 
-Installation
-------------
-
-If not already installed, [install pip](https://pip.pypa.io/en/latest/installing.html). Then run:
-
-    $ pip install test-informant
-
-
-Usage
------
-
-To run the pulse listener:
-
-    $ test-informant
-
-To generate a report:
-
-    $ generate-informant-report --from-date YYYY-MM-DD --to-date YYYY-MM-DD
-
-
-Additional Information
-----------------------
-
-For more information, see the [project page](https://wiki.mozilla.org/Auto-tools/Projects/Test-Informant).
+[0]: https://wiki.mozilla.org/Auto-tools/Projects/ActiveData
+[1]: https://wiki.mozilla.org/Auto-tools/Projects/Test-Informant
