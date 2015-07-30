@@ -37,48 +37,15 @@
             <label for="suite-selection" class="control-label">Suite
             <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
             <div>
-                <select id="suite-selection" multiple="multiple" class="form-control">
-                    <option value="androidx86-set">androidx86-set</option>
-                    <option value="gaia-ui-test-a11y">gaia-ui-test-a11y</option>
-                    <option value="gaia-ui-test-functional">gaia-ui-test-functional</option>
-                    <option value="gaia-ui-test-unit">gaia-ui-test-unit</option>
-                    <option value="gaia-unit">gaia-unit</option>
-                    <option value="marionette">marionette</option>
-                    <option value="marionette-e10s">marionette-e10s</option>
-                    <option value="marionette-webapi">marionette-webapi</option>
-                    <option value="mochitest-a11y">mochitest-a11y</option>
-                    <option value="mochitest-browser-chrome">mochitest-browser-chrome</option>
-                    <option value="mochitest-e10s-browser-chrome">mochitest-browser-chrome-e10s</option>
-                    <option value="mochitest-chrome">mochitest-chrome</option>
-                    <option value="mochitest-debug">mochitest-debug</option>
-                    <option value="mochitest-devtools-chrome">mochitest-devtools-chrome</option>
-                    <option value="mochitest-e10s-devtools-chrome">mochitest-devtools-chrome-e10s</option>
-                    <option value="mochitest-gl">mochitest-gl</option>
-                    <option value="mochitest-jetpack">mochitest-jetpack</option>
-                    <option value="mochitest-oop">mochitest-oop</option>
-                    <option value="mochitest-other">mochitest-other</option>
-                    <option value="mochitest">mochitest-plain</option>
-                    <option value="mochitest-e10s">mochitest-plain-e10s</option>
-                    <option value="robocop">robocop</option>
-                    <option value="xpcshell">xpcshell</option>
-                    <option value="web-platform-tests">web-platform-tests</option>
-                    <option value="web-platform-tests-reftests">web-platform-tests-reftests</option>
-                </select>
+                <select id="suite-selection" multiple="multiple" class="form-control"></select>
             </div>
         </div>
+
         <div id="branch-group" class="form-group">
             <label for="branch-selection" class="control-label">Branch</label>
             <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
             <div>
-                <select id="branch-selection" class="form-control">
-                    <option value="b2g-inbound">b2g-inbound</option>
-                    <option value="fx-team">fx-team</option>
-                    <option value="mozilla-aurora">mozilla-aurora</option>
-                    <option value="mozilla-beta">mozilla-beta</option>
-                    <option value="mozilla-central" selected="selected">mozilla-central</option>
-                    <option value="mozilla-inbound">mozilla-inbound</option>
-                    <option value="mozilla-release">mozilla-release</option>
-                </select>
+                <select id="branch-selection" class="form-control"></select>
             </div>
         </div>
 
@@ -109,13 +76,21 @@
 <script type="text/javascript" src="js/libs/bootstrap-multiselect.js"></script>
 <script type="text/javascript" src="js/libs/bootstrap-datepicker.min.js"></script>
 <script type="text/javascript" src="js/libs/handlebars.runtime.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
 <script type="text/javascript" src="js/report.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
+        $.each(BRANCHES, function(key, value) {
+          $('#branch-selection').append('<option value="' + value + '">' + value + '</option>');
+        });
+        $('#branch-selection').multiselect();
+
+        $.each(SUITES, function(key, value) {
+          $('#suite-selection').append('<option value="' + key +'">' + value.displayName + '</option>');
+        });
         $('#suite-selection').multiselect({
             includeSelectAllOption: true
         });
-        $('#branch-selection').multiselect();
 
         var endDate = new Date();
         var fromDate = new Date();
