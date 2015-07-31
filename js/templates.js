@@ -11,11 +11,15 @@ templates['header'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function
     + alias3(((helper = (helper = helpers.totalPercentage || (depth0 != null ? depth0.totalPercentage : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalPercentage","hash":{},"data":data}) : helper)))
     + "% of tests across all suites and configurations are enabled.</div>\n</div>\n<div id=\"data\">\n    <div id=\"suites-accordion\" class=\"panel-group\" role=\"tablist\" aria-multiselectable=\"true\">\n    </div>\n</div>\n";
 },"useData":true});
-templates['platform'] = template({"1":function(depth0,helpers,partials,data) {
-    return "                                    <a href=\"#\" class=\"list-group-item\">"
-    + this.escapeExpression(this.lambda(depth0, depth0))
+templates['platform'] = template({"1":function(depth0,helpers,partials,data,blockParams,depths) {
+    var alias1=this.escapeExpression;
+
+  return "                                    <a href=\""
+    + alias1(helpers.testurl.call(depth0,depth0,(depths[1] != null ? depths[1].suite : depths[1]),{"name":"testurl","hash":{},"data":data}))
+    + "\" class=\"list-group-item\">"
+    + alias1(this.lambda(depth0, depth0))
     + "</a>\n";
-},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,blockParams,depths) {
     var stack1, helper, alias1=helpers.helperMissing, alias2="function", alias3=this.escapeExpression;
 
   return "<div id=\""
@@ -85,7 +89,7 @@ templates['platform'] = template({"1":function(depth0,helpers,partials,data) {
     + "-"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
     + "-skipped-heading\">\n                        <div class=\"panel-body\">\n                            <div class=\"list-group\">\n"
-    + ((stack1 = helpers.each.call(depth0,(depth0 != null ? depth0.skipped : depth0),{"name":"each","hash":{},"fn":this.program(1, data, 0),"inverse":this.noop,"data":data})) != null ? stack1 : "")
+    + ((stack1 = helpers.each.call(depth0,(depth0 != null ? depth0.skipped : depth0),{"name":"each","hash":{},"fn":this.program(1, data, 0, blockParams, depths),"inverse":this.noop,"data":data})) != null ? stack1 : "")
     + "                            </div>\n                        </div>\n                    </div>\n                </div>\n                <div id=\""
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-"
@@ -117,7 +121,7 @@ templates['platform'] = template({"1":function(depth0,helpers,partials,data) {
     + "-"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
     + "-added-heading\">\n                        <div class=\"panel-body\">\n                            <div class=\"list-group\">\n"
-    + ((stack1 = helpers.each.call(depth0,(depth0 != null ? depth0.added : depth0),{"name":"each","hash":{},"fn":this.program(1, data, 0),"inverse":this.noop,"data":data})) != null ? stack1 : "")
+    + ((stack1 = helpers.each.call(depth0,(depth0 != null ? depth0.added : depth0),{"name":"each","hash":{},"fn":this.program(1, data, 0, blockParams, depths),"inverse":this.noop,"data":data})) != null ? stack1 : "")
     + "                            </div>\n                        </div>\n                    </div>\n                </div>\n                <div id=\""
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-"
@@ -149,9 +153,9 @@ templates['platform'] = template({"1":function(depth0,helpers,partials,data) {
     + "-"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
     + "-removed-heading\">\n                        <div class=\"panel-body\">\n                            <div class=\"list-group\">\n"
-    + ((stack1 = helpers.each.call(depth0,(depth0 != null ? depth0.removed : depth0),{"name":"each","hash":{},"fn":this.program(1, data, 0),"inverse":this.noop,"data":data})) != null ? stack1 : "")
+    + ((stack1 = helpers.each.call(depth0,(depth0 != null ? depth0.removed : depth0),{"name":"each","hash":{},"fn":this.program(1, data, 0, blockParams, depths),"inverse":this.noop,"data":data})) != null ? stack1 : "")
     + "                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            </div>\n        </div>\n    </div> \n</div>\n";
-},"useData":true});
+},"useData":true,"useDepths":true});
 templates['suite'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     var helper, alias1=helpers.helperMissing, alias2="function", alias3=this.escapeExpression;
 

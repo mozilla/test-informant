@@ -1,5 +1,11 @@
 function dxr(testName) {
+  if (testName == null) return;
+  return "https://dxr.mozilla.org/mozilla-central/source/" + testName;
+}
 
+function marionette(testName) {
+  if (testName == null) return;
+  return "https://dxr.mozilla.org/mozilla-central/source/testing/marionette/client/marionette/tests/unit/" + testName.split(" ", 1)[0];
 }
 
 var SUITES = {
@@ -25,11 +31,11 @@ var SUITES = {
   },
   'marionette': {
     displayName: 'marionette',
-    urlFormatter: dxr
+    urlFormatter: marionette
   },
   'marionette-e10s': {
     displayName: 'marionette-e10s',
-    urlFormatter: dxr
+    urlFormatter: marionette
   },
   'marionette-webapi': {
     displayName: 'marionette-webapi',
@@ -114,5 +120,3 @@ var BRANCHES = [
   'mozilla-beta',
   'mozilla-release'
 ];
-
-  

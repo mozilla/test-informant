@@ -4,6 +4,12 @@
 
 importScripts('libs/handlebars.runtime.js');
 importScripts('templates.js');
+importScripts('config.js');
+
+Handlebars.registerHelper('testurl', function(test, suite) {
+  return SUITES[suite].urlFormatter(test);
+});
+
 
 function map(data) {
   var normdata = {}
@@ -152,6 +158,7 @@ function generate(payload) {
   }
   return { header: header, suites: suites };
 }
+
 
 self.addEventListener('message', function(e) {
   var cmd = e.data.cmd;

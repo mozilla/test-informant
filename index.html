@@ -75,7 +75,6 @@
 <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/libs/bootstrap-multiselect.js"></script>
 <script type="text/javascript" src="js/libs/bootstrap-datepicker.min.js"></script>
-<script type="text/javascript" src="js/libs/handlebars.runtime.js"></script>
 <script type="text/javascript" src="js/config.js"></script>
 <script type="text/javascript" src="js/report.js"></script>
 <script type="text/javascript">
@@ -109,17 +108,6 @@
         $('#date-selection .from-date').datepicker('update');
         $('#date-selection .to-date').datepicker('setDate', toDate);
         $('#date-selection .to-date').datepicker('update');
-
-        Handlebars.registerHelper("ifeq", function(a, b, options) {
-            if (a == b) {
-                return options.fn(this);
-            }
-        });
-        Handlebars.registerHelper("ifneq", function(a, b, options) {
-            if (a != b) {
-                return options.fn(this);
-            }
-        });
     });
 </script>
 </body>

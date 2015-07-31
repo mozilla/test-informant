@@ -23,7 +23,7 @@
                         <div class="panel-body">
                             <div class="list-group">
                                 {{#each skipped}}
-                                    <a href="#" class="list-group-item">{{this}}</a>
+                                    <a href="{{testurl this ../suite}}" class="list-group-item">{{this}}</a>
                                 {{/each}}
                             </div>
                         </div>
@@ -39,7 +39,7 @@
                         <div class="panel-body">
                             <div class="list-group">
                                 {{#each added}}
-                                    <a href="#" class="list-group-item">{{this}}</a>
+                                    <a href="{{testurl this ../suite}}" class="list-group-item">{{this}}</a>
                                 {{/each}}
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                         <div class="panel-body">
                             <div class="list-group">
                                 {{#each removed}}
-                                    <a href="#" class="list-group-item">{{this}}</a>
+                                    <a href="{{testurl this ../suite}}" class="list-group-item">{{this}}</a>
                                 {{/each}}
                             </div>
                         </div>

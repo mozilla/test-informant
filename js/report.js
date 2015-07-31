@@ -160,7 +160,7 @@ ReportGenerator.prototype = {
       $('#generate-button').prop('disabled', false);
       $('#generate-button').html('Generate Report');
       $('#generate-status').html('');
-      $('#report').html("Something went wrong :(.<br>Status: " + error.status + " " + error.statusText);
+      $('#report').html("Something went wrong :(<br>" + error.status + " " + error.statusText);
       console.log("Query failed: %o", error);
     };
 
