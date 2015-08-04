@@ -5,7 +5,7 @@ function dxr(testName) {
 
 function marionette(testName) {
   if (testName == null) return;
-  return "https://dxr.mozilla.org/mozilla-central/source/testing/marionette/client/marionette/tests/unit/" + testName.split(" ", 1)[0];
+  return "https://dxr.mozilla.org/mozilla-central/search?q=path%3A" + testName.split(" ", 1)[0];
 }
 
 var SUITES = {
@@ -23,7 +23,7 @@ var SUITES = {
   },
   'marionette-webapi': {
     displayName: 'marionette-webapi',
-    urlFormatter: dxr
+    urlFormatter: marionette
   },
   'mochitest-a11y': {
     displayName: 'mochitest-a11y',
