@@ -15,6 +15,12 @@ function map(data) {
   var normdata = {}
   for (var i = 0; i < data.length; ++i) {
     var [platform, type, suite, test, result, count] = data[i];
+
+    // test is sometimes null for some reason
+    if (test === null) {
+      continue;
+    }
+
     platform = platform + '-' + type;
 
     if (!(suite in normdata)) {
@@ -122,9 +128,12 @@ function generate(payload) {
   var suiteNames = Object.keys(data['suites']).sort();
   for (var i = 0; i < suiteNames.length; ++i) {
     var suite = suiteNames[i];
+    var meta = data['suites'][suite]['meta'];
     context = {
       suite: suite,
-      meta: data['suites'][suite]['meta']
+      totalAdded: meta['totalAdded'],
+      totalRemoved: meta['totalRemoved'],
+      totalPercentage: Math.round(meta['totalActive'] / (meta['totalActive'] + meta['totalSkipped']) * 100)
     }
     var suitePanel = Handlebars.templates.suite(context);
     suites[suite] = {};
@@ -148,6 +157,7 @@ function generate(payload) {
       context['totalSkipped'] = pObj['skipped'].length;
       context['totalAdded'] = pObj['added'].length;
       context['totalRemoved'] = pObj['removed'].length;
+      context['totalPercentage'] = Math.round(context['totalActive'] / context['total'] * 100);
 
       for (var attr in pObj) {
         context[attr] = pObj[attr];

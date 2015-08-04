@@ -1,16 +1,21 @@
 <div id="{{suite}}-{{platform}}-panel" class="panel panel-default">
     <div id="{{suite}}-{{platform}}-heading" class="panel-heading" role="tab" data-toggle="collapse" data-parent="#{{suite}}-accordion" data-target="#{{suite}}-{{platform}}-collapse">
-        <h4 class="panel-title">
-            <a>{{platform}}</a>
-        </h4>
+        <span>
+            <span class="panel-heading-details">
+                <span class="up">&uarr;{{totalAdded}}</span>
+                <span class="down">&darr;{{totalRemoved}}</span>
+                <span class="percent">{{totalPercentage}}%</span>
+            </span>
+            <h4 class="panel-title">
+                <a>{{platform}}</a>
+            </h4>
+        </span>
     </div>
     <div id="{{suite}}-{{platform}}-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-heading">
         <div class="panel-body">
-            <div class="panel panel-default">
-                <ul>
-                    <li>Total tests: {{total}}</li>
-                    <li>Total active tests: {{totalActive}}</li>
-                </ul>
+            <div class="panel panel-default platform-panel-details">
+                <div>Total tests: {{total}}</div>
+                <div>Total active tests: {{totalActive}}</div>
             </div>
             <div id="{{suite}}-{{platform}}-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
                 <div id="{{suite}}-{{platform}}-skipped-panel" class="panel panel-default">
@@ -23,7 +28,7 @@
                         <div class="panel-body">
                             <div class="list-group">
                                 {{#each skipped}}
-                                    <a href="{{testurl this ../suite}}" class="list-group-item">{{this}}</a>
+                                    <a href="{{testurl this ../suite}}" target="_blank" class="list-group-item">{{this}}</a>
                                 {{/each}}
                             </div>
                         </div>
@@ -39,7 +44,7 @@
                         <div class="panel-body">
                             <div class="list-group">
                                 {{#each added}}
-                                    <a href="{{testurl this ../suite}}" class="list-group-item">{{this}}</a>
+                                    <a href="{{testurl this ../suite}}" target="_blank" class="list-group-item">{{this}}</a>
                                 {{/each}}
                             </div>
                         </div>
@@ -55,7 +60,7 @@
                         <div class="panel-body">
                             <div class="list-group">
                                 {{#each removed}}
-                                    <a href="{{testurl this ../suite}}" class="list-group-item">{{this}}</a>
+                                    <a href="{{testurl this ../suite}}" target="_blank" class="list-group-item">{{this}}</a>
                                 {{/each}}
                             </div>
                         </div>

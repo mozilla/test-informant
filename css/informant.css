@@ -2,6 +2,26 @@
     cursor: pointer;
 }
 
+.panel-heading-details {
+    float: right;
+}
+
+.panel-heading-details .up{
+    color: green;
+}
+
+.panel-heading-details .down {
+    color: darkred;
+}
+
+.panel-heading-details .percent {
+    margin-left: 10px;
+}
+
+.platform-panel-details > div {
+    padding: 2px 0px 2px 15px;
+}
+
 .glyphicon.spinning {
     animation: spin 1s infinite linear;
 }

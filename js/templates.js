@@ -16,7 +16,7 @@ templates['platform'] = template({"1":function(depth0,helpers,partials,data,bloc
 
   return "                                    <a href=\""
     + alias1(helpers.testurl.call(depth0,depth0,(depths[1] != null ? depths[1].suite : depths[1]),{"name":"testurl","hash":{},"data":data}))
-    + "\" class=\"list-group-item\">"
+    + "\" target=\"_blank\" class=\"list-group-item\">"
     + alias1(this.lambda(depth0, depth0))
     + "</a>\n";
 },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,blockParams,depths) {
@@ -36,9 +36,15 @@ templates['platform'] = template({"1":function(depth0,helpers,partials,data,bloc
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
-    + "-collapse\">\n        <h4 class=\"panel-title\">\n            <a>"
+    + "-collapse\">\n        <span>\n            <span class=\"panel-heading-details\">\n                <span class=\"up\">&uarr;"
+    + alias3(((helper = (helper = helpers.totalAdded || (depth0 != null ? depth0.totalAdded : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalAdded","hash":{},"data":data}) : helper)))
+    + "</span>\n                <span class=\"down\">&darr;"
+    + alias3(((helper = (helper = helpers.totalRemoved || (depth0 != null ? depth0.totalRemoved : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalRemoved","hash":{},"data":data}) : helper)))
+    + "</span>\n                <span class=\"percent\">"
+    + alias3(((helper = (helper = helpers.totalPercentage || (depth0 != null ? depth0.totalPercentage : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalPercentage","hash":{},"data":data}) : helper)))
+    + "%</span>\n            </span>\n            <h4 class=\"panel-title\">\n                <a>"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
-    + "</a>\n        </h4>\n    </div>\n    <div id=\""
+    + "</a>\n            </h4>\n        </span>\n    </div>\n    <div id=\""
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
@@ -46,11 +52,11 @@ templates['platform'] = template({"1":function(depth0,helpers,partials,data,bloc
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
-    + "-heading\">\n        <div class=\"panel-body\">\n            <div class=\"panel panel-default\">\n                <ul>\n                    <li>Total tests: "
+    + "-heading\">\n        <div class=\"panel-body\">\n            <div class=\"panel panel-default platform-panel-details\">\n                <div>Total tests: "
     + alias3(((helper = (helper = helpers.total || (depth0 != null ? depth0.total : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"total","hash":{},"data":data}) : helper)))
-    + "</li>\n                    <li>Total active tests: "
+    + "</div>\n                <div>Total active tests: "
     + alias3(((helper = (helper = helpers.totalActive || (depth0 != null ? depth0.totalActive : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalActive","hash":{},"data":data}) : helper)))
-    + "</li>\n                </ul>\n            </div>\n            <div id=\""
+    + "</div>\n            </div>\n            <div id=\""
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-"
     + alias3(((helper = (helper = helpers.platform || (depth0 != null ? depth0.platform : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"platform","hash":{},"data":data}) : helper)))
@@ -149,14 +155,20 @@ templates['suite'] = template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-heading\" class=\"panel-heading\" role=\"tab\" data-toggle=\"collapse\" data-parent=\"#suites-accordion\" data-target=\"#"
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
-    + "-collapse\">\n        <h4 class=\"panel-title\">\n            <a>"
+    + "-collapse\">\n        <span>\n            <span class=\"panel-heading-details\">\n                <span class=\"up\">&uarr;"
+    + alias3(((helper = (helper = helpers.totalAdded || (depth0 != null ? depth0.totalAdded : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalAdded","hash":{},"data":data}) : helper)))
+    + "</span>\n                <span class=\"down\">&darr;"
+    + alias3(((helper = (helper = helpers.totalRemoved || (depth0 != null ? depth0.totalRemoved : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalRemoved","hash":{},"data":data}) : helper)))
+    + "</span>\n                <span class=\"percent\">"
+    + alias3(((helper = (helper = helpers.totalPercentage || (depth0 != null ? depth0.totalPercentage : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"totalPercentage","hash":{},"data":data}) : helper)))
+    + "%</span>\n            </span>\n            <h4 class=\"panel-title\">\n                <a>"
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
-    + "</a>\n        </h4>\n    </div>\n    <div id=\""
+    + "</a>\n            </h4>\n        </span>\n    </div>\n    <div id=\""
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-collapse\" class=\"panel-collapse collapse\" role=\"tabpanel\" aria-labelled-by=\""
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
     + "-heading\">\n        <div class=\"panel-body\">\n            <div id=\""
     + alias3(((helper = (helper = helpers.suite || (depth0 != null ? depth0.suite : depth0)) != null ? helper : alias1),(typeof helper === alias2 ? helper.call(depth0,{"name":"suite","hash":{},"data":data}) : helper)))
-    + "-accordion\" class=\"panel-group\" role=\"tablist\" aria-multiselectable=\"true\">\n            </div>\n        </div>\n    </div> \n</div>\n";
+    + "-accordion\" class=\"panel-group\" role=\"tablist\" aria-multiselectable=\"true\">\n            </div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
 })();
