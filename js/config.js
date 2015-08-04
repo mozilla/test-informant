@@ -13,22 +13,6 @@ var SUITES = {
     displayName: 'androidx86-set',
     urlFormatter: dxr
   },
-  'gaia-ui-test-a11y': {
-    displayName: 'gaia-ui-test-a11y',
-    urlFormatter: dxr
-  },
-  'gaia-ui-test-functional': {
-    displayName: 'gaia-ui-test-functional',
-    urlFormatter: dxr
-  },
-  'gaia-ui-test-unit': {
-    displayName: 'gaia-ui-test-unit',
-    urlFormatter: dxr
-  },
-  'gaia-unit': {
-    displayName: 'gaia-unit',
-    urlFormatter: dxr
-  },
   'marionette': {
     displayName: 'marionette',
     urlFormatter: marionette
