@@ -89,7 +89,7 @@ ReportGenerator.prototype = {
         "build.type",
         "run.suite",
         "result.test",
-        "result.result"
+        "result.status"
       ],
       where: {
         and: [
