@@ -1,7 +1,7 @@
 <div id="{{suite}}-{{platform}}-panel" class="panel panel-default">
-    <div id="{{suite}}-{{platform}}-heading" class="panel-heading" role="tab">
+    <div id="{{suite}}-{{platform}}-heading" class="panel-heading" role="tab" data-toggle="collapse" data-parent="#{{suite}}-accordion" data-target="#{{suite}}-{{platform}}-collapse">
         <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#{{suite}}-accordion" href="#{{suite}}-{{platform}}-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-collapse">{{platform}}</a>
+            <a>{{platform}}</a>
         </h4>
     </div>
     <div id="{{suite}}-{{platform}}-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-heading">
@@ -14,9 +14,9 @@
             </div>
             <div id="{{suite}}-{{platform}}-accordion" class="panel-group" role="tablist" aria-multiselectable="true">
                 <div id="{{suite}}-{{platform}}-skipped-panel" class="panel panel-default">
-                    <div id="{{suite}}-{{platform}}-skipped-heading" class="panel-heading" role="tab">
+                    <div id="{{suite}}-{{platform}}-skipped-heading" class="panel-heading" role="tab" data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" data-target="#{{suite}}-{{platform}}-skipped-collapse">
                         <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-skipped-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-skipped-collapse">skipped tests: {{totalSkipped}}</a>
+                            <a>skipped tests: {{totalSkipped}}</a>
                         </h4>
                     </div>
                     <div id="{{suite}}-{{platform}}-skipped-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-skipped-heading">
@@ -30,9 +30,9 @@
                     </div>
                 </div>
                 <div id="{{suite}}-{{platform}}-added-panel" class="panel panel-default">
-                    <div id="{{suite}}-{{platform}}-added-heading" class="panel-heading" role="tab">
+                    <div id="{{suite}}-{{platform}}-added-heading" class="panel-heading" role="tab" data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" data-target="#{{suite}}-{{platform}}-added-collapse">
                         <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-added-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-added-collapse">added tests: {{totalAdded}}</a>
+                            <a>added tests: {{totalAdded}}</a>
                         </h4>
                     </div>
                     <div id="{{suite}}-{{platform}}-added-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-added-heading">
@@ -46,9 +46,9 @@
                     </div>
                 </div>
                 <div id="{{suite}}-{{platform}}-removed-panel" class="panel panel-default">
-                    <div id="{{suite}}-{{platform}}-removed-heading" class="panel-heading" role="tab">
+                    <div id="{{suite}}-{{platform}}-removed-heading" class="panel-heading" role="tab" data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" data-target="#{{suite}}-{{platform}}-removed-collapse">
                         <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#{{suite}}-{{platform}}-accordion" href="#{{suite}}-{{platform}}-removed-collapse" aria-expanded="true" aria-controls="{{suite}}-{{platform}}-removed-collapse">removed tests: {{totalRemoved}}</a>
+                            <a>removed tests: {{totalRemoved}}</a>
                         </h4>
                     </div>
                     <div id="{{suite}}-{{platform}}-removed-collapse" class="panel-collapse collapse" role="tabpanel" aria-labelled-by="{{suite}}-{{platform}}-removed-heading">

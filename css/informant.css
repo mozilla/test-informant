@@ -1,3 +1,7 @@
+.panel-heading {
+    cursor: pointer;
+}
+
 .glyphicon.spinning {
     animation: spin 1s infinite linear;
 }

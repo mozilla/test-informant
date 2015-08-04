@@ -123,7 +123,8 @@ function generate(payload) {
   for (var i = 0; i < suiteNames.length; ++i) {
     var suite = suiteNames[i];
     context = {
-      suite: suite
+      suite: suite,
+      meta: data['suites'][suite]['meta']
     }
     var suitePanel = Handlebars.templates.suite(context);
     suites[suite] = {};
