@@ -1,12 +1,15 @@
 function dxr(testName) {
-  if (testName == null) return;
   return "https://dxr.mozilla.org/mozilla-central/source/" + testName;
 }
 
 function marionette(testName) {
-  if (testName == null) return;
   return "https://dxr.mozilla.org/mozilla-central/search?q=path%3A" + testName.split(" ", 1)[0];
 }
+
+function wpt(testName) {
+  return "https://dxr.mozilla.org/mozilla-central/source/testing/web-platform/tests" + testName;
+}
+
 
 var SUITES = {
   'androidx86-set': {
@@ -87,11 +90,11 @@ var SUITES = {
   },
   'web-platform-tests': {
     displayName: 'web-platform-tests',
-    urlFormatter: dxr
+    urlFormatter: wpt
   },
   'web-platform-tests-reftests': {
     displayName: 'web-platform-tests-reftests',
-    urlFormatter: dxr
+    urlFormatter: wpt
   }
 };
 
