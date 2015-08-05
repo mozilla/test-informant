@@ -7,6 +7,9 @@ function marionette(testName) {
 }
 
 function wpt(testName) {
+  if (testName.indexOf('/_mozilla') == 0) {
+    return "https://dxr.mozilla.org/mozilla-central/source/testing/web-platform/mozilla/tests" + testName.substr(9);
+  }
   return "https://dxr.mozilla.org/mozilla-central/source/testing/web-platform/tests" + testName;
 }
 
