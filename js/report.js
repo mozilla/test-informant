@@ -166,7 +166,7 @@ ReportGenerator.prototype = {
 
     $('#generate-button').prop('disabled', true);
     $('#generate-button').html('<span class="glyphicon glyphicon-refresh spinning"></span> Working...');
-    $('#generate-status').html('Querying database...');
+    $('#generate-status').html('Querying database... (this could take a few minutes)');
 
     var fromPromise = this.queryDate(suites, branch, fromDate);
     if (fromDate != toDate) {
