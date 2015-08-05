@@ -71,6 +71,7 @@ ReportFormatter.prototype = {
 
   noDataError: function(date) {
     resetGenerateButton();
+    $('.form').css('border-bottom', 'none');
     $('#report').html('No data found for ' + date + '. Either no jobs of the ' +
                       'requested type ran that day on that branch, or the ' +
                       'ActiveData service does not contain that data.');
