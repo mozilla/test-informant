@@ -2,6 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+function resetGenerateButton() {
+  $('#generate-button').prop('disabled', false);
+  $('#generate-button').html('Generate Report');
+  $('#generate-status').html('');
+}
+
 function ActiveData(server) {
   this.server = server || "http://activedata.allizom.org/query";
 }
@@ -50,9 +56,7 @@ ReportFormatter.prototype = {
         $('#' + suite + '-accordion').append(platformPanel);
       }
     }
-    $('#generate-button').prop('disabled', false);
-    $('#generate-button').html('Generate Report');
-    $('#generate-status').html('');
+    resetGenerateButton();
   },
 
   generateHtml: function(data) {
@@ -65,7 +69,20 @@ ReportFormatter.prototype = {
     this.worker.postMessage({cmd: 'generate', payload: payload});
   },
 
+  noDataError: function(date) {
+    resetGenerateButton();
+    $('#report').html('No data found for ' + date + '. Either no jobs of the ' +
+                      'requested type ran that day on that branch, or the ' +
+                      'ActiveData service does not contain that data.');
+  },
+
   format: function(fromData, toData) {
+    if (fromData.length == 0) {
+      return this.noDataError(this.fromDate);
+    } else if (toData.length == 0) {
+      return this.noDataError(this.toDate);
+    }
+
     $('#generate-status').html('Generating report...');
     var payload = {fromData: fromData, toData: toData};
     this.worker.postMessage({cmd: 'mapreduce', payload: payload});
@@ -157,9 +174,7 @@ ReportGenerator.prototype = {
 
     var fmt = new ReportFormatter(fromDate, toDate);
     var onError = function(error) {
-      $('#generate-button').prop('disabled', false);
-      $('#generate-button').html('Generate Report');
-      $('#generate-status').html('');
+      resetGenerateButton();
       $('#report').html("Something went wrong :(<br>" + error.status + " " + error.statusText);
       console.log("Query failed: %o", error);
     };
